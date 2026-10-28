@@ -72,13 +72,13 @@
   <div class="cabecalho-pagina">
     <p class="rotulo">Área restrita</p>
     <h1>Painel do catálogo</h1>
-    <p class="cabecalho-pagina__linha">Cadastre e remova peças. Tudo grava direto no localStorage, sem recarregar a página.</p>
+    <p class="cabecalho-pagina__linha">Cadastre, edite e remova peças. Tudo grava direto no localStorage, sem recarregar a página.</p>
   </div>
 
   <div class="admin">
 
-    <!-- REQUISITO 2: adicionar elementos na base -->
-    <section class="admin__form" aria-labelledby="tituloNovoProduto">
+    <!-- REQUISITO 2: adicionar e editar elementos na base -->
+    <section class="admin__form" id="secaoFormProduto" aria-labelledby="tituloNovoProduto">
       <h2 id="tituloNovoProduto">Nova peça</h2>
       <form class="formulario" id="formProduto" novalidate>
         <div class="campo">
@@ -148,7 +148,8 @@
         </div>
 
         <p class="erro" id="erroProduto" role="alert"></p>
-        <button class="btn btn--acento btn--bloco" type="submit">Adicionar ao catálogo</button>
+        <button class="btn btn--acento btn--bloco" type="submit" id="btnSalvarProduto">Adicionar ao catálogo</button>
+        <button class="btn btn--vazado btn--bloco" type="button" id="btnCancelarEdicao" hidden>Cancelar edição</button>
       </form>
     </section>
 
@@ -158,7 +159,7 @@
       <div class="tabela-rolagem">
         <table class="tabela">
           <thead>
-            <tr><th>Foto</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Vendidos</th><th>Ação</th></tr>
+            <tr><th>Foto</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Vendidos</th><th>Ações</th></tr>
           </thead>
           <tbody id="corpoTabelaProdutos"></tbody>
         </table>
