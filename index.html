@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VERSO — Streetwear direto da rua</title>
+<meta name="description" content="VERSO é uma loja de streetwear: camisetas, calças, tênis e conjuntos selecionados peça a peça.">
+<meta name="theme-color" content="#0A0A0B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Chivo:ital,wght@0,300..900;1,400&family=Martian+Mono:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<!-- REQUISITO 5: página inicial com menu, logo, informação do site e produtos na tela -->
+<body data-pagina="home">
+
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<!-- faixa de aviso (marquee em CSS puro) -->
+<div class="aviso">
+  <div class="aviso__faixa">
+    <span>Frete grátis acima de R$ 299</span><i>◆</i>
+    <span>Cupom VERSO10 = 10% OFF</span><i>◆</i>
+    <span>Troca garantida em 30 dias</span><i>◆</i>
+    <span>Drop 04 no ar</span><i>◆</i>
+    <span>Frete grátis acima de R$ 299</span><i>◆</i>
+    <span>Cupom VERSO10 = 10% OFF</span><i>◆</i>
+    <span>Troca garantida em 30 dias</span><i>◆</i>
+    <span>Drop 04 no ar</span><i>◆</i>
+  </div>
+</div>
+
+<header class="cabecalho">
+  <div class="cabecalho__interno">
+    <button class="btn-icone btn-menu" id="btnMenu" aria-label="Abrir menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+
+    <a class="logo" href="index.html" aria-label="VERSO, ir para a página inicial">
+      <svg class="logo__marca" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3 L12 21 L22 3"/></svg>
+      <span class="logo__texto">VERSO</span>
+    </a>
+
+    <nav class="menu" id="menu" aria-label="Menu principal">
+      <a href="index.html" class="ativo">Início</a>
+      <a href="pages/produtos.html">Catálogo</a>
+      <a href="#colecoes">Coleções</a>
+      <a href="pages/favoritos.html">Favoritos</a>
+      <a href="pages/relatorio.html">Relatório</a>
+    </nav>
+
+    <div class="acoes">
+      <button class="btn-icone" id="btnBusca" aria-label="Abrir busca" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 L21 21"/></svg>
+      </button>
+      <a class="btn-icone" href="pages/favoritos.html" aria-label="Favoritos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C12 20.5 3.5 14.4 3.5 8.9A4.6 4.6 0 0 1 12 6.4a4.6 4.6 0 0 1 8.5 2.5c0 5.5-8.5 11.6-8.5 11.6Z"/></svg>
+        <span class="contador" id="contadorFavoritos">0</span>
+      </a>
+      <a class="btn-icone" href="pages/carrinho.html" aria-label="Carrinho">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l1 12.5h-15Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="contador" id="contadorCarrinho">0</span>
+      </a>
+      <button class="btn-icone" id="btnTema" aria-label="Alternar tema claro e escuro">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 7 7 0 0 0 20 14.5Z"/></svg>
+      </button>
+      <a class="btn-conta" href="pages/login.html" id="linkConta">Entrar</a>
+    </div>
+  </div>
+
+  <form class="busca-topo" id="buscaTopo" hidden role="search">
+    <label class="oculto" for="campoBuscaTopo">Buscar peças</label>
+    <input type="search" id="campoBuscaTopo" placeholder="Camiseta, calça, tênis...">
+    <button class="btn btn--acento" type="submit">Buscar</button>
+  </form>
+</header>
+
+<main id="conteudo">
+
+  <!-- PALCO: carrossel automático com TODAS as coleções da loja.
+       As cenas são montadas pelo JS a partir do catálogo. -->
+  <section class="palco" id="palco" aria-roledescription="carrossel" aria-label="Coleções da VERSO">
+    <div class="palco__trilho">
+      <div class="palco__faixa"></div>
+    </div>
+    <div class="palco__base">
+      <div class="palco__guias" role="group" aria-label="Escolher coleção"></div>
+      <div class="palco__setas">
+        <button class="palco__seta palco__seta--ant" type="button" aria-label="Coleção anterior">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button class="palco__seta palco__seta--prox" type="button" aria-label="Próxima coleção">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- cards de categoria com foto da peça, em carrossel (setas montadas pelo JS) -->
+  <div class="trilha-topo">
+    <div>
+      <p class="rotulo">Atalhos</p>
+      <h2>Por onde começar</h2>
+    </div>
+    <a class="link-seta" href="pages/produtos.html">Catálogo completo <span aria-hidden="true">&rarr;</span></a>
+  </div>
+
+  <div class="atalhos-carrossel" id="atalhosCarrossel">
+  <nav class="atalhos" aria-label="Categorias">
+    <a class="atalho" href="pages/produtos.html?categoria=Tênis">
+      <img src="assets/img/produtos/tenis-low-ceu.webp" alt="" loading="lazy"><span>Tênis</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?categoria=Camisetas">
+      <img src="assets/img/produtos/camiseta-ringer-contraste.webp" alt="" loading="lazy"><span>Camisetas</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?categoria=Calças">
+      <img src="assets/img/produtos/calca-alfaiataria-corte-seco.webp" alt="" loading="lazy"><span>Calças</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?categoria=Conjuntos">
+      <img src="assets/img/produtos/conjunto-trico-damas.jpeg" alt="" loading="lazy"><span>Conjuntos</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?categoria=Chinelos">
+      <img src="assets/img/produtos/slide-monobloco.png" alt="" loading="lazy"><span>Chinelos</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?ordem=vendidos">
+      <img src="assets/img/produtos/tenis-mid-ametista.webp" alt="" loading="lazy"><span>Mais vendidos</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?colecao=Asfalto">
+      <img src="assets/img/vitrine/atalho-colecao-asfalto.jpg" alt="" loading="lazy"><span>Coleção Asfalto</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?colecao=Quadra">
+      <img src="assets/img/produtos/tenis-high-taxi.jpeg" alt="" loading="lazy"><span>Coleção Quadra</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?colecao=Verão 88">
+      <img src="assets/img/produtos/camiseta-clube-por-do-sol.webp" alt="" loading="lazy"><span>Coleção Verão 88</span>
+    </a>
+    <a class="atalho" href="pages/produtos.html?ordem=menor">
+      <img src="assets/img/produtos/tenis-low-camurca-corda.webp" alt="" loading="lazy"><span>Menor preço</span>
+    </a>
+  </nav>
+  </div>
+
+  <!-- círculos de estilo: cada um abre o catálogo já buscando o termo -->
+  <nav class="estilos" aria-label="Buscar por estilo">
+    <a class="estilo" href="pages/produtos.html?busca=Preto"><img src="assets/img/produtos/tenis-low-camurca-corda.webp" alt="" loading="lazy"><span>Preto</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Branco"><img src="assets/img/produtos/camiseta-nevoa.webp" alt="" loading="lazy"><span>Branco</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Azul"><img src="assets/img/produtos/tenis-low-royal.webp" alt="" loading="lazy"><span>Azul</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Amarelo"><img src="assets/img/produtos/tenis-low-mostarda.jpeg" alt="" loading="lazy"><span>Amarelo</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Vermelho"><img src="assets/img/produtos/tenis-mid-brasa.webp" alt="" loading="lazy"><span>Vermelho</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Cano alto"><img src="assets/img/produtos/tenis-high-fusao.webp" alt="" loading="lazy"><span>Cano alto</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Chunky"><img src="assets/img/produtos/tenis-cadence-marinho.webp" alt="" loading="lazy"><span>Chunky</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Mesh"><img src="assets/img/produtos/jersey-mesh-00.webp" alt="" loading="lazy"><span>Mesh</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Tricô"><img src="assets/img/vitrine/estilo-trico.webp" alt="" loading="lazy"><span>Tricô</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Jeans"><img src="assets/img/produtos/calca-jeans-wide-rasgada.webp" alt="" loading="lazy"><span>Jeans</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Estampa"><img src="assets/img/produtos/camiseta-avenida-noturna.webp" alt="" loading="lazy"><span>Estampa</span></a>
+    <a class="estilo" href="pages/produtos.html?busca=Plataforma"><img src="assets/img/produtos/tenis-plataforma-breu.webp" alt="" loading="lazy"><span>Plataforma</span></a>
+  </nav>
+
+  <!-- DIFERENCIAL 11: contagem regressiva do próximo drop -->
+  <section class="drop">
+    <img src="assets/img/vitrine/drop-fundo.jpeg" alt="Par de tênis cano alto branco e preto segurado na mão sobre um piso de concreto" class="drop__fundo">
+    <div class="drop__conteudo">
+      <p class="rotulo">Próximo drop</p>
+      <p class="drop__relogio" id="relogioDrop">--d --h --m --s</p>
+      <p class="drop__nota">Lista de peças novas liberada direto no catálogo. Quem chega primeiro leva.</p>
+    </div>
+  </section>
+
+  <!-- Lançamentos -->
+  <section class="secao" aria-labelledby="tituloLancamentos">
+    <div class="secao__topo">
+      <div>
+        <p class="rotulo">Entrou agora</p>
+        <h2 id="tituloLancamentos">Lançamentos</h2>
+      </div>
+      <a class="link-seta" href="pages/produtos.html">Ver tudo <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="grade" id="gradeLancamentos"></div>
+  </section>
+
+  <!-- DIFERENCIAL 12: mais vendidos da semana -->
+  <section class="secao secao--invertida" aria-labelledby="tituloVendidos">
+    <div class="secao__topo">
+      <div>
+        <p class="rotulo">Ranking da semana</p>
+        <h2 id="tituloVendidos">Mais vendidos</h2>
+      </div>
+      <a class="link-seta" href="pages/produtos.html?ordem=vendidos">Ranking completo <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="grade" id="gradeVendidos"></div>
+  </section>
+
+  <!-- Coleções temáticas: a grade também é montada a partir do catálogo -->
+  <section class="secao" id="colecoes" aria-labelledby="tituloColecoes">
+    <div class="secao__topo">
+      <div>
+        <p class="rotulo">Recortes da loja</p>
+        <h2 id="tituloColecoes">Coleções</h2>
+      </div>
+      <span class="rotulo" id="contagemColecoes">—</span>
+    </div>
+    <div class="colecoes" id="gradeColecoes"></div>
+  </section>
+
+  <!-- Manifesto / o que é o site -->
+  <section class="manifesto">
+    <img src="assets/img/vitrine/editorial-camiseta-letras.jpeg" alt="Homem de costas usando camiseta branca com letras coloridas estampadas" loading="lazy">
+    <div class="manifesto__texto">
+      <p class="rotulo">O que é a VERSO</p>
+      <h2>Loja pequena,<br>curadoria grande.</h2>
+      <p>A VERSO é uma loja de streetwear que trabalha em drops curtos. Cada peça entra no catálogo depois de passar por prova, medida e foto real — nada de imagem de fornecedor. São camisetas, calças, conjuntos, chinelos e tênis que a gente consegue explicar de onde vieram.</p>
+      <p>Compra pelo site, retira em Guarulhos ou recebe em casa. Frete grátis acima de R$&nbsp;299 e troca em 30 dias, sem perguntar o motivo.</p>
+      <a class="link-seta" href="pages/produtos.html">Começar pelo catálogo <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
+
+  <!-- Bloco de confiança numerado 01-04 -->
+  <section class="confianca" aria-labelledby="tituloConfianca">
+    <h2 id="tituloConfianca" class="oculto">Por que comprar na VERSO</h2>
+    <ol class="confianca__lista">
+      <li><span class="confianca__num">01</span><h3>Peça conferida</h3><p>Costura, etiqueta e medida checadas antes de ir pro estoque.</p></li>
+      <li><span class="confianca__num">02</span><h3>Troca em 30 dias</h3><p>Tamanho errado acontece. Devolve e troca sem custo extra.</p></li>
+      <li><span class="confianca__num">03</span><h3>Pagamento seguro</h3><p>Pix, boleto ou cartão em até 6x sem juros.</p></li>
+      <li><span class="confianca__num">04</span><h3>Envio em 24h</h3><p>Pedido aprovado até 16h sai no mesmo dia útil.</p></li>
+    </ol>
+    <img src="assets/img/vitrine/editorial-tenis-manchas.jpg" alt="Detalhe de um tênis cano baixo colorido com estampa de manchas e cadarço grosso" loading="lazy">
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <div class="rodape__topo">
+    <div class="rodape__marca">
+      <a class="logo" href="index.html" aria-label="VERSO">
+        <svg class="logo__marca" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3 L12 21 L22 3"/></svg>
+        <span class="logo__texto">VERSO</span>
+      </a>
+      <p>Streetwear em drops curtos.<br>Guarulhos — SP.</p>
+    </div>
+    <div class="rodape__coluna">
+      <h3>Loja</h3>
+      <a href="pages/produtos.html">Catálogo</a>
+      <a href="pages/produtos.html?colecao=Asfalto">Asfalto</a>
+      <a href="pages/produtos.html?colecao=Quadra">Quadra</a>
+      <a href="pages/produtos.html?colecao=Verão 88">Verão 88</a>
+    </div>
+    <div class="rodape__coluna">
+      <h3>Conta</h3>
+      <a href="pages/login.html">Entrar ou criar conta</a>
+      <a href="pages/favoritos.html">Favoritos</a>
+      <a href="pages/carrinho.html">Carrinho</a>
+      <a href="pages/relatorio.html">Meus pedidos</a>
+    </div>
+    <div class="rodape__coluna">
+      <h3>Ajuda</h3>
+      <p>Seg a sex, 9h às 18h</p>
+      <p>contato@verso.com.br</p>
+      <p>(11) 4002-8922</p>
+    </div>
+  </div>
+  <div class="rodape__base">
+    <ul class="pagamentos" aria-label="Formas de pagamento">
+      <li>Pix</li><li>Visa</li><li>Master</li><li>Elo</li><li>Boleto</li>
+    </ul>
+    <p>&copy; <span id="ano">2026</span> VERSO — trabalho acadêmico. Dados guardados no seu navegador.</p>
+  </div>
+</footer>
+
+<div class="toast-area" id="toastArea" aria-live="polite"></div>
+
+<!-- todo o JavaScript do site num script comum só -->
+<script src="assets/js/script.js"></script>
+</body>
+</html>

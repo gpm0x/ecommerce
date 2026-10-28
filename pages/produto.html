@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0A0B">
+<title>Produto — VERSO</title>
+<meta name="description" content="Detalhe da peça na VERSO: foto grande, tamanhos, parcelamento e peças relacionadas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Chivo:ital,wght@0,300..900;1,400&family=Martian+Mono:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-pagina="detalhe" data-raiz="../">
+
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<div class="aviso">
+  <div class="aviso__faixa">
+    <span>Frete grátis acima de R$ 299</span><i>◆</i>
+    <span>Cupom VERSO10 = 10% OFF</span><i>◆</i>
+    <span>Troca garantida em 30 dias</span><i>◆</i>
+    <span>Frete grátis acima de R$ 299</span><i>◆</i>
+    <span>Cupom VERSO10 = 10% OFF</span><i>◆</i>
+    <span>Troca garantida em 30 dias</span><i>◆</i>
+  </div>
+</div>
+
+<header class="cabecalho">
+  <div class="cabecalho__interno">
+    <button class="btn-icone btn-menu" id="btnMenu" aria-label="Abrir menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="logo" href="../index.html" aria-label="VERSO, ir para a página inicial">
+      <svg class="logo__marca" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3 L12 21 L22 3"/></svg>
+      <span class="logo__texto">VERSO</span>
+    </a>
+    <nav class="menu" id="menu" aria-label="Menu principal">
+      <a href="../index.html">Início</a>
+      <a href="produtos.html" class="ativo">Catálogo</a>
+      <a href="../index.html#colecoes">Coleções</a>
+      <a href="favoritos.html">Favoritos</a>
+      <a href="relatorio.html">Relatório</a>
+    </nav>
+    <div class="acoes">
+      <button class="btn-icone" id="btnBusca" aria-label="Abrir busca" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 L21 21"/></svg>
+      </button>
+      <a class="btn-icone" href="favoritos.html" aria-label="Favoritos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C12 20.5 3.5 14.4 3.5 8.9A4.6 4.6 0 0 1 12 6.4a4.6 4.6 0 0 1 8.5 2.5c0 5.5-8.5 11.6-8.5 11.6Z"/></svg>
+        <span class="contador" id="contadorFavoritos">0</span>
+      </a>
+      <a class="btn-icone" href="carrinho.html" aria-label="Carrinho">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l1 12.5h-15Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="contador" id="contadorCarrinho">0</span>
+      </a>
+      <button class="btn-icone" id="btnTema" aria-label="Alternar tema claro e escuro">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 7 7 0 0 0 20 14.5Z"/></svg>
+      </button>
+      <a class="btn-conta" href="login.html" id="linkConta">Entrar</a>
+    </div>
+  </div>
+  <form class="busca-topo" id="buscaTopo" hidden role="search">
+    <label class="oculto" for="campoBuscaTopo">Buscar peças</label>
+    <input type="search" id="campoBuscaTopo" placeholder="Camiseta, calça, tênis...">
+    <button class="btn btn--acento" type="submit">Buscar</button>
+  </form>
+</header>
+
+<main id="conteudo" class="pagina">
+
+  <nav class="migalhas" aria-label="Você está em">
+    <a href="../index.html">Início</a> <span aria-hidden="true">/</span>
+    <a href="produtos.html">Catálogo</a> <span aria-hidden="true">/</span>
+    <span id="migalhaNome">Produto</span>
+  </nav>
+
+  <!-- o JS preenche este bloco a partir do ?id= da URL -->
+  <section class="detalhe" id="detalhe"></section>
+
+  <section class="secao" id="secaoRelacionados" hidden>
+    <div class="secao__topo"><h2>Combina com</h2></div>
+    <div class="grade" id="gradeRelacionados"></div>
+  </section>
+
+  <!-- DIFERENCIAL 12: vistos recentemente -->
+  <section class="secao" id="secaoVistos" hidden>
+    <div class="secao__topo"><h2>Vistos recentemente</h2></div>
+    <div class="grade" id="gradeVistos"></div>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <div class="rodape__topo">
+    <div class="rodape__marca">
+      <a class="logo" href="../index.html" aria-label="VERSO">
+        <svg class="logo__marca" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3 L12 21 L22 3"/></svg>
+        <span class="logo__texto">VERSO</span>
+      </a>
+      <p>Streetwear em drops curtos.<br>Guarulhos — SP.</p>
+    </div>
+    <div class="rodape__coluna">
+      <h3>Loja</h3>
+      <a href="produtos.html">Catálogo</a>
+      <a href="produtos.html?colecao=Asfalto">Asfalto</a>
+      <a href="produtos.html?colecao=Quadra">Quadra</a>
+      <a href="produtos.html?colecao=Verão 88">Verão 88</a>
+    </div>
+    <div class="rodape__coluna">
+      <h3>Conta</h3>
+      <a href="login.html">Entrar ou criar conta</a>
+      <a href="favoritos.html">Favoritos</a>
+      <a href="carrinho.html">Carrinho</a>
+      <a href="relatorio.html">Meus pedidos</a>
+    </div>
+    <div class="rodape__coluna">
+      <h3>Ajuda</h3>
+      <p>Seg a sex, 9h às 18h</p>
+      <p>contato@verso.com.br</p>
+      <p>(11) 4002-8922</p>
+    </div>
+  </div>
+  <div class="rodape__base">
+    <ul class="pagamentos" aria-label="Formas de pagamento">
+      <li>Pix</li><li>Visa</li><li>Master</li><li>Elo</li><li>Boleto</li>
+    </ul>
+    <p>&copy; <span id="ano">2026</span> VERSO — trabalho acadêmico. Dados guardados no seu navegador.</p>
+  </div>
+</footer>
+
+<div class="toast-area" id="toastArea" aria-live="polite"></div>
+
+<!-- todo o JavaScript do site num script comum só -->
+<script src="../assets/js/script.js"></script>
+</body>
+</html>
