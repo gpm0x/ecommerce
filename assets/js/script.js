@@ -290,7 +290,7 @@
      var usuario = usuarioLogado();
      if (usuario && usuario.tipo === "admin") return true;
      if (!usuario) {
-       window.location.href = PASTA_PAGINAS + "login.html?voltar=admin.html";
+       window.location.href = PASTA_PAGINAS + "login.html?voltar=" + encodeURIComponent(nomeDaPagina());
      } else {
        window.location.href = RAIZ + "index.html";
      }
@@ -1229,16 +1229,46 @@
      });
    }
    
-   // O link do admin só aparece para quem é admin
+   // Relatório e Admin só aparecem no menu para quem é admin.
+   // Para o consumidor esses links nem existem na página.
    function montarLinkAdmin() {
      var usuario = usuarioLogado();
      var menu = document.getElementById("menu");
      if (!usuario || usuario.tipo !== "admin" || !menu) return;
+     var pagina = document.body.dataset.pagina;
+   
+     var relatorio = document.createElement("a");
+     relatorio.href = PASTA_PAGINAS + "relatorio.html";
+     relatorio.textContent = "Relatório";
+     if (pagina === "relatorio") relatorio.className = "ativo";
+     menu.appendChild(relatorio);
+   
      var link = document.createElement("a");
      link.href = PASTA_PAGINAS + "admin.html";
      link.textContent = "Admin";
-     link.className = "menu__admin";
+     link.className = "menu__admin" + (pagina === "admin" ? " ativo" : "");
      menu.appendChild(link);
+   }
+   
+   // O localStorage avisa as OUTRAS abas quando uma chave muda (evento "storage").
+   // É assim que o painel do admin, aberto numa aba, fica sabendo da compra
+   // que o cliente acabou de finalizar em outra — sem recarregar a página.
+   function aoMudarDados(chaves, callback) {
+     window.addEventListener("storage", function (evento) {
+       if (evento.key === null || chaves.indexOf(evento.key) !== -1) callback(evento.key);
+     });
+   }
+   
+   // Números de venda usados pelo painel admin e pelo relatório
+   function resumirVendas(pedidos) {
+     var resumo = { pedidos: pedidos.length, itens: 0, total: 0, ultimo: null };
+     var i, j;
+     for (i = 0; i < pedidos.length; i++) {
+       resumo.total += pedidos[i].total;
+       for (j = 0; j < pedidos[i].itens.length; j++) resumo.itens += pedidos[i].itens[j].quantidade;
+     }
+     if (pedidos.length > 0) resumo.ultimo = pedidos[pedidos.length - 1];
+     return resumo;
    }
    
    // DIFERENCIAL 1: menu hambúrguer no celular (vira tela cheia)
@@ -2171,7 +2201,7 @@
        cupomAtivo = null;
        document.getElementById("campoCupom").value = "";
        desenhar();
-       mostrarToast("Pedido fechado. Confira no relatório.");
+       mostrarToast("Pedido fechado! Obrigado pela compra.");
      });
    
      desenhar();
@@ -2490,10 +2520,28 @@
      });
    
      desenharTabelaAdmin();
+     desenharVendasAdmin();
+   
+     // cliente finalizou compra em outra aba -> vendas e tabela se atualizam
+     aoMudarDados(["verso_pedidos", "verso_produtos"], function (chave) {
+       desenharVendasAdmin();
+       desenharTabelaAdmin();
+       if (chave === "verso_pedidos") mostrarToast("Nova venda registrada");
+     });
    
      // veio do botão "Editar produto" da página da peça (admin.html?editar=ID)
      var paraEditar = buscarProduto(parametroDaUrl("editar"));
      if (paraEditar) entrarEmEdicao(paraEditar);
+   }
+   
+   function desenharVendasAdmin() {
+     var vendas = resumirVendas(lerStorage("verso_pedidos") || []);
+     animarNumero(document.getElementById("admPedidos"), vendas.pedidos, false);
+     animarNumero(document.getElementById("admItens"), vendas.itens, false);
+     animarNumero(document.getElementById("admVendido"), vendas.total, true);
+     document.getElementById("admUltimo").textContent = vendas.ultimo
+       ? "#" + vendas.ultimo.id + " · " + formatarPreco(vendas.ultimo.total) + " · " + vendas.ultimo.data
+       : "—";
    }
    
    function atualizarPreviaAdmin() {
@@ -2634,52 +2682,41 @@
       ######################################################### */
    
    /* --- RELATÓRIO --- */
+   // Página restrita: consumidor comum é mandado de volta para o início
    function iniciarRelatorio() {
-     if (!exigirLogin()) return;
+     if (!exigirAdmin()) return;
    
-     var usuario = usuarioLogado();
-     var ehAdmin = usuario.tipo === "admin";
+     desenharRelatorio();
+   
+     // compra finalizada (ou peça/usuário novo) em outra aba -> relatório atualiza
+     aoMudarDados(["verso_pedidos", "verso_produtos", "verso_usuarios"], function (chave) {
+       desenharRelatorio();
+       if (chave === "verso_pedidos") mostrarToast("Nova venda registrada");
+     });
+   
+     document.getElementById("btnLimparDados").addEventListener("click", function () {
+       if (!confirm("Isso apaga produtos, usuários, pedidos e carrinhos. Continuar?")) return;
+       restaurarSeed();
+       fazerLogout();
+       window.location.href = RAIZ + "index.html";
+     });
+   }
+   
+   function desenharRelatorio() {
      var produtos = lerProdutos();
      var usuarios = lerUsuarios();
      var pedidos = lerStorage("verso_pedidos") || [];
-   
-     // cliente comum só enxerga os próprios pedidos
-     var meusPedidos = [];
-     var i;
-     for (i = 0; i < pedidos.length; i++) {
-       if (ehAdmin || pedidos[i].idUsuario === usuario.id) meusPedidos.push(pedidos[i]);
-     }
-   
-     document.getElementById("linhaRelatorio").textContent = ehAdmin
-       ? "Visão de administrador: todos os pedidos da loja."
-       : "Visão de cliente: aqui aparecem apenas os seus pedidos.";
-   
-     // cards de resumo
-     var totalVendido = 0;
-     for (i = 0; i < meusPedidos.length; i++) totalVendido += meusPedidos[i].total;
+     var vendas = resumirVendas(pedidos);
    
      animarNumero(document.getElementById("totProdutos"), produtos.length, false);
      animarNumero(document.getElementById("totUsuarios"), usuarios.length, false);
-     animarNumero(document.getElementById("totPedidos"), meusPedidos.length, false);
-     animarNumero(document.getElementById("totVendido"), totalVendido, true);
+     animarNumero(document.getElementById("totPedidos"), vendas.pedidos, false);
+     animarNumero(document.getElementById("totVendido"), vendas.total, true);
      document.getElementById("totCampeao").textContent = produtoMaisVendido(produtos);
    
-     desenharPedidos(meusPedidos);
+     desenharPedidos(pedidos, usuarios);
      desenharProdutosRelatorio(produtos);
-   
-     // tabela de usuários e botão de limpeza só para o admin
-     if (ehAdmin) {
-       desenharUsuarios(usuarios);
-       document.getElementById("zonaPerigo").hidden = false;
-       document.getElementById("btnLimparDados").addEventListener("click", function () {
-         if (!confirm("Isso apaga produtos, usuários, pedidos e carrinhos. Continuar?")) return;
-         restaurarSeed();
-         fazerLogout();
-         window.location.href = RAIZ + "index.html";
-       });
-     } else {
-       document.getElementById("blocoUsuarios").hidden = true;
-     }
+     desenharUsuarios(usuarios);
    }
    
    function produtoMaisVendido(produtos) {
@@ -2692,12 +2729,12 @@
      return campeao.nome + " (" + campeao.vendidos + ")";
    }
    
-   function desenharPedidos(pedidos) {
+   function desenharPedidos(pedidos, usuarios) {
      var corpo = document.getElementById("corpoPedidos");
      corpo.textContent = "";
    
      if (pedidos.length === 0) {
-       corpo.appendChild(linhaVazia(5, "Nenhum pedido registrado ainda."));
+       corpo.appendChild(linhaVazia(6, "Nenhum pedido registrado ainda."));
        return;
      }
    
@@ -2707,6 +2744,7 @@
        var linha = document.createElement("tr");
        linha.appendChild(celula("#" + pedido.id));
        linha.appendChild(celula(pedido.data));
+       linha.appendChild(celula(nomeDoCliente(usuarios, pedido.idUsuario)));
    
        var tdItens = document.createElement("td");
        var lista = document.createElement("ul");
@@ -2724,6 +2762,14 @@
        linha.appendChild(celula(formatarPreco(pedido.total)));
        corpo.appendChild(linha);
      }
+   }
+   
+   function nomeDoCliente(usuarios, id) {
+     var i;
+     for (i = 0; i < usuarios.length; i++) {
+       if (usuarios[i].id === id) return usuarios[i].nome;
+     }
+     return "—";
    }
    
    function desenharProdutosRelatorio(produtos) {

@@ -40,7 +40,6 @@
       <a href="produtos.html">Catálogo</a>
       <a href="../index.html#colecoes">Coleções</a>
       <a href="favoritos.html">Favoritos</a>
-      <a href="relatorio.html" class="ativo">Relatório</a>
     </nav>
     <div class="acoes">
       <button class="btn-icone" id="btnBusca" aria-label="Abrir busca" aria-expanded="false">
@@ -70,13 +69,13 @@
 <main id="conteudo" class="pagina">
 
   <div class="cabecalho-pagina">
-    <p class="rotulo">localStorage</p>
+    <p class="rotulo">Área restrita</p>
     <h1>Relatório da loja</h1>
-    <p class="cabecalho-pagina__linha" id="linhaRelatorio">Tudo que está guardado no navegador neste momento.</p>
+    <p class="cabecalho-pagina__linha" id="linhaRelatorio">Vendas, produtos e clientes da loja. Atualiza sozinho a cada compra finalizada.</p>
   </div>
 
   <!-- REQUISITO 3: relatório do que está armazenado -->
-  <section class="resumo-cards" aria-label="Resumo">
+  <section class="resumo-cards" aria-label="Resumo" aria-live="polite">
     <article class="cartao-numero"><span class="cartao-numero__valor" id="totProdutos">0</span><span class="cartao-numero__rotulo">Produtos</span></article>
     <article class="cartao-numero"><span class="cartao-numero__valor" id="totUsuarios">0</span><span class="cartao-numero__rotulo">Usuários</span></article>
     <article class="cartao-numero"><span class="cartao-numero__valor" id="totPedidos">0</span><span class="cartao-numero__rotulo">Pedidos</span></article>
@@ -88,7 +87,7 @@
     <h2 id="tituloPedidos">Pedidos</h2>
     <div class="tabela-rolagem">
       <table class="tabela">
-        <thead><tr><th>Pedido</th><th>Data</th><th>Itens</th><th>Cupom</th><th>Total</th></tr></thead>
+        <thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Itens</th><th>Cupom</th><th>Total</th></tr></thead>
         <tbody id="corpoPedidos"></tbody>
       </table>
     </div>
@@ -104,7 +103,7 @@
     </div>
   </section>
 
-  <section class="bloco-tabela" id="blocoUsuarios" aria-labelledby="tituloUsuarios">
+  <section class="bloco-tabela" aria-labelledby="tituloUsuarios">
     <h2 id="tituloUsuarios">Usuários cadastrados</h2>
     <p class="nota">A senha nunca é exibida no relatório.</p>
     <div class="tabela-rolagem">
@@ -115,7 +114,7 @@
     </div>
   </section>
 
-  <section class="zona-perigo" id="zonaPerigo" hidden>
+  <section class="zona-perigo">
     <div>
       <h2>Limpar dados da loja</h2>
       <p>Apaga produtos, usuários, pedidos, carrinhos e favoritos, e recria o catálogo inicial.</p>
@@ -146,7 +145,6 @@
       <a href="login.html">Entrar ou criar conta</a>
       <a href="favoritos.html">Favoritos</a>
       <a href="carrinho.html">Carrinho</a>
-      <a href="relatorio.html">Meus pedidos</a>
     </div>
     <div class="rodape__coluna">
       <h3>Ajuda</h3>

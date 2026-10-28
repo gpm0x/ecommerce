@@ -40,7 +40,6 @@
       <a href="produtos.html">Catálogo</a>
       <a href="../index.html#colecoes">Coleções</a>
       <a href="favoritos.html">Favoritos</a>
-      <a href="relatorio.html">Relatório</a>
     </nav>
     <div class="acoes">
       <button class="btn-icone" id="btnBusca" aria-label="Abrir busca" aria-expanded="false">
@@ -72,8 +71,16 @@
   <div class="cabecalho-pagina">
     <p class="rotulo">Área restrita</p>
     <h1>Painel do catálogo</h1>
-    <p class="cabecalho-pagina__linha">Cadastre, edite e remova peças. Tudo grava direto no localStorage, sem recarregar a página.</p>
+    <p class="cabecalho-pagina__linha">Cadastre, edite e remova peças e acompanhe as vendas. Tudo grava direto no localStorage, sem recarregar a página.</p>
   </div>
+
+  <!-- vendas: atualizam sozinhas quando um cliente finaliza a compra -->
+  <section class="resumo-cards resumo-cards--quatro" aria-label="Resumo de vendas" aria-live="polite">
+    <article class="cartao-numero"><span class="cartao-numero__valor" id="admPedidos">0</span><span class="cartao-numero__rotulo">Pedidos</span></article>
+    <article class="cartao-numero"><span class="cartao-numero__valor" id="admItens">0</span><span class="cartao-numero__rotulo">Peças vendidas</span></article>
+    <article class="cartao-numero"><span class="cartao-numero__valor" id="admVendido">R$ 0</span><span class="cartao-numero__rotulo">Valor vendido</span></article>
+    <article class="cartao-numero cartao-numero--largo"><span class="cartao-numero__valor cartao-numero__valor--texto" id="admUltimo">—</span><span class="cartao-numero__rotulo">Último pedido</span></article>
+  </section>
 
   <div class="admin">
 
@@ -191,7 +198,6 @@
       <a href="login.html">Entrar ou criar conta</a>
       <a href="favoritos.html">Favoritos</a>
       <a href="carrinho.html">Carrinho</a>
-      <a href="relatorio.html">Meus pedidos</a>
     </div>
     <div class="rodape__coluna">
       <h3>Ajuda</h3>
