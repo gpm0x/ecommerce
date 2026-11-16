@@ -105,11 +105,19 @@
       </div>
       <div class="campo">
         <label for="cadEmail">E-mail</label>
-        <input type="email" id="cadEmail" autocomplete="email" placeholder="voce@email.com">
+        <input type="email" id="cadEmail" autocomplete="email" placeholder="voce@email.com" aria-describedby="avisoCadEmail">
+        <p class="aviso-campo" id="avisoCadEmail" aria-live="polite"></p>
       </div>
       <div class="campo">
         <label for="cadSenha">Senha</label>
-        <input type="password" id="cadSenha" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+        <input type="password" id="cadSenha" autocomplete="new-password" placeholder="Ex.: Verso@24" aria-describedby="forcaSenha regrasSenha">
+        <!-- validação da senha ao vivo: força + checklist do padrão -->
+        <p class="forca-senha" id="forcaSenha" aria-live="polite" hidden></p>
+        <ul class="regras-senha" id="regrasSenha">
+          <li data-regra="tamanho">Mínimo de 6 caracteres</li>
+          <li data-regra="maiuscula">Uma letra maiúscula</li>
+          <li data-regra="especial">Um caractere especial (ex.: @ # ! $)</li>
+        </ul>
       </div>
       <div class="campo">
         <label for="cadSenha2">Confirmar senha</label>

@@ -105,6 +105,16 @@
       </dl>
 
       <button class="btn btn--acento btn--bloco" id="btnFinalizar">Finalizar compra</button>
+
+      <!-- visitante tentou fechar o pedido: pede login ou cadastro (o carrinho fica guardado) -->
+      <div class="aviso-conta" id="avisoConta" role="alert" tabindex="-1" hidden>
+        <p class="aviso-conta__titulo">Entre para fechar o pedido</p>
+        <p class="aviso-conta__texto">Para finalizar a compra você precisa entrar na sua conta ou criar uma. Suas peças continuam no carrinho.</p>
+        <div class="aviso-conta__botoes">
+          <a class="btn btn--acento" href="login.html?voltar=carrinho.html">Entrar</a>
+          <a class="btn btn--claro" href="login.html?voltar=carrinho.html&amp;aba=criar">Criar conta</a>
+        </div>
+      </div>
       <a class="link-seta" href="produtos.html">Continuar comprando</a>
     </aside>
   </div>

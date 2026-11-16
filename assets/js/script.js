@@ -123,6 +123,16 @@
    function apagarStorage(chave) {
      localStorage.removeItem(chave);
    }
+
+   // Próximo id livre de uma lista (produtos ou usuários): maior id + 1
+   function proximoId(lista) {
+     var maior = 0;
+     var i;
+     for (i = 0; i < lista.length; i++) {
+       if (lista[i].id > maior) maior = lista[i].id;
+     }
+     return maior + 1;
+   }
    
    
    /* #########################################################
@@ -191,11 +201,11 @@
    // Perfis fictícios que o botão "Preencher com dados de exemplo" joga no cadastro.
    // Não são salvos de antemão: só viram conta quando alguém clica em "Criar conta".
    var CONSUMIDORES_EXEMPLO = [
-     { nome: "Ana Ribeiro", email: "ana.ribeiro@email.com", senha: "cliente123" },
-     { nome: "Lucas Ferreira", email: "lucas.ferreira@email.com", senha: "cliente123" },
-     { nome: "Marina Costa", email: "marina.costa@email.com", senha: "cliente123" },
-     { nome: "Rafael Souza", email: "rafael.souza@email.com", senha: "cliente123" },
-     { nome: "Júlia Almeida", email: "julia.almeida@email.com", senha: "cliente123" }
+     { nome: "Ana Ribeiro", email: "ana.ribeiro@email.com", senha: "Cliente@123" },
+     { nome: "Lucas Ferreira", email: "lucas.ferreira@email.com", senha: "Cliente@123" },
+     { nome: "Marina Costa", email: "marina.costa@email.com", senha: "Cliente@123" },
+     { nome: "Rafael Souza", email: "rafael.souza@email.com", senha: "Cliente@123" },
+     { nome: "Júlia Almeida", email: "julia.almeida@email.com", senha: "Cliente@123" }
    ];
    
    // Sobe quando os dados iniciais mudam de formato (ex.: as imagens mudaram
@@ -383,17 +393,6 @@
      }
      salvarStorage("verso_produtos", restantes);
    }
-   
-   function proximoIdProduto() {
-     var produtos = lerProdutos();
-     var maior = 0;
-     var i;
-     for (i = 0; i < produtos.length; i++) {
-       if (produtos[i].id > maior) maior = produtos[i].id;
-     }
-     return maior + 1;
-   }
-   
    
    /* #########################################################
       services/carrinho.js
@@ -593,6 +592,37 @@
    
    /* ===== DOM / RENDER ===== */
    
+   // REQUISITO 4: atalho do createElement usado no site todo.
+   // Monta o elemento já com classe e texto numa linha só.
+   function novo(tag, classe, texto) {
+     var el = document.createElement(tag);
+     if (classe) el.className = classe;
+     if (texto !== undefined && texto !== null) el.textContent = texto;
+     return el;
+   }
+
+   // Botão comum (type="button" evita enviar formulário sem querer)
+   function novoBotao(classe, texto, aoClicar) {
+     var botao = novo("button", classe, texto);
+     botao.type = "button";
+     if (aoClicar) botao.addEventListener("click", aoClicar);
+     return botao;
+   }
+
+   function novaImagem(caminho, alt, classe) {
+     var foto = novo("img", classe);
+     foto.src = urlImagem(caminho);
+     foto.alt = alt;
+     foto.loading = "lazy";
+     return foto;
+   }
+
+   function novoLink(classe, texto, destino) {
+     var link = novo("a", classe, texto);
+     link.href = destino;
+     return link;
+   }
+
    function formatarPreco(valor) {
      return "R$ " + valor.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
    }
@@ -611,96 +641,63 @@
    function mostrarToast(mensagem) {
      var area = document.getElementById("toastArea");
      if (!area) return;
-     var toast = document.createElement("div");
-     toast.className = "toast";
-     toast.textContent = mensagem;
+     var toast = novo("div", "toast", mensagem);
      area.appendChild(toast);
      setTimeout(function () { toast.remove(); }, 3000);
    }
    
-   // REQUISITO 4: todo o card é montado com createElement / appendChild / classList
+   function linkDoProduto(produto) {
+     return PASTA_PAGINAS + "produto.html?id=" + produto.id;
+   }
+
+   // Preço atual, com o antigo riscado antes quando houver promoção
+   function criarPrecos(classe, produto) {
+     var precos = novo("p", classe);
+     if (produto.precoAntigo) precos.appendChild(novo("s", null, formatarPreco(produto.precoAntigo)));
+     precos.appendChild(novo("strong", null, formatarPreco(produto.preco)));
+     return precos;
+   }
+
+   // Favorita/desfavorita e dá o retorno visual (contador + toast). Devolve o novo estado.
+   function favoritar(idProduto) {
+     var virou = alternarFavorito(idProduto);
+     atualizarContadores();
+     reanimar(document.getElementById("contadorFavoritos"), "pulsa");
+     mostrarToast(virou ? "Salvo nos favoritos" : "Removido dos favoritos");
+     return virou;
+   }
+
+   // REQUISITO 4: todo o card é montado com createElement (via novo) / appendChild / classList
    function criarCardProduto(produto, posicao) {
-     var card = document.createElement("article");
-     card.className = "card aparece";
+     var card = novo("article", "card aparece");
      if (posicao) card.style.animationDelay = (posicao % POR_PAGINA) * 0.04 + "s";
-   
-     var link = document.createElement("a");
-     link.className = "card__foto";
-     link.href = PASTA_PAGINAS + "produto.html?id=" + produto.id;
-   
-     var foto = document.createElement("img");
-     foto.src = urlImagem(produto.imagem);
-     foto.alt = produto.nome + " na cor " + produto.cor;
-     foto.loading = "lazy";
-     link.appendChild(foto);
-   
+
+     var link = novoLink("card__foto", null, linkDoProduto(produto));
+     link.appendChild(novaImagem(produto.imagem, produto.nome + " na cor " + produto.cor));
      var desconto = calcularDesconto(produto);
-     if (desconto > 0) {
-       var selo = document.createElement("span");
-       selo.className = "selo";
-       selo.textContent = "-" + desconto + "%";
-       link.appendChild(selo);
-     }
-   
-     if (produto.destaque) {
-       var seloDestaque = document.createElement("span");
-       seloDestaque.className = "selo selo--destaque";
-       seloDestaque.textContent = "Escolha da casa";
-       link.appendChild(seloDestaque);
-     }
-   
+     if (desconto > 0) link.appendChild(novo("span", "selo", "-" + desconto + "%"));
+     if (produto.destaque) link.appendChild(novo("span", "selo selo--destaque", "Escolha da casa"));
+
      // DIFERENCIAL 8: coração de favorito
-     var coracao = document.createElement("button");
-     coracao.className = "coracao";
-     coracao.type = "button";
-     coracao.setAttribute("aria-label", "Favoritar " + produto.nome);
-     coracao.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C12 20.5 3.5 14.4 3.5 8.9A4.6 4.6 0 0 1 12 6.4a4.6 4.6 0 0 1 8.5 2.5c0 5.5-8.5 11.6-8.5 11.6Z"/></svg>';
-     if (ehFavorito(produto.id)) coracao.classList.add("ativo");
-     coracao.addEventListener("click", function () {
-       var virou = alternarFavorito(produto.id);
+     var coracao = novoBotao("coracao", null, function () {
+       var virou = favoritar(produto.id);
        coracao.classList.toggle("ativo", virou);
-       atualizarContadores();
        reanimar(coracao, "pulo");
-       reanimar(document.getElementById("contadorFavoritos"), "pulsa");
-       mostrarToast(virou ? "Salvo nos favoritos" : "Removido dos favoritos");
        // na página de favoritos a peça some da lista na hora
        if (document.body.dataset.pagina === "favoritos" && !virou) card.remove();
      });
-   
-     var info = document.createElement("div");
-     info.className = "card__info";
-   
-     var categoria = document.createElement("p");
-     categoria.className = "card__categoria";
-     categoria.textContent = produto.categoria;
-   
-     var nome = document.createElement("h3");
-     nome.className = "card__nome";
-     var linkNome = document.createElement("a");
-     linkNome.href = PASTA_PAGINAS + "produto.html?id=" + produto.id;
-     linkNome.textContent = produto.nome;
-     nome.appendChild(linkNome);
-   
-     var precos = document.createElement("p");
-     precos.className = "card__preco";
-     if (produto.precoAntigo) {
-       var antigo = document.createElement("s");
-       antigo.textContent = formatarPreco(produto.precoAntigo);
-       precos.appendChild(antigo);
-     }
-     var atual = document.createElement("strong");
-     atual.textContent = formatarPreco(produto.preco);
-     precos.appendChild(atual);
-   
-     var parcela = document.createElement("p");
-     parcela.className = "card__parcela";
-     parcela.textContent = PARCELAS + "x de " + formatarPreco(produto.preco / PARCELAS);
-   
-     info.appendChild(categoria);
+     coracao.setAttribute("aria-label", "Favoritar " + produto.nome);
+     coracao.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C12 20.5 3.5 14.4 3.5 8.9A4.6 4.6 0 0 1 12 6.4a4.6 4.6 0 0 1 8.5 2.5c0 5.5-8.5 11.6-8.5 11.6Z"/></svg>';
+     if (ehFavorito(produto.id)) coracao.classList.add("ativo");
+
+     var info = novo("div", "card__info");
+     info.appendChild(novo("p", "card__categoria", produto.categoria));
+     var nome = novo("h3", "card__nome");
+     nome.appendChild(novoLink(null, produto.nome, linkDoProduto(produto)));
      info.appendChild(nome);
-     info.appendChild(precos);
-     info.appendChild(parcela);
-   
+     info.appendChild(criarPrecos("card__preco", produto));
+     info.appendChild(novo("p", "card__parcela", PARCELAS + "x de " + formatarPreco(produto.preco / PARCELAS)));
+
      card.appendChild(link);
      card.appendChild(coracao);
      card.appendChild(info);
@@ -713,30 +710,17 @@
      var i;
      for (i = 0; i < produtos.length; i++) {
        var card = criarCardProduto(produtos[i], i + 1);
-       if (comRanking) {
-         var rank = document.createElement("span");
-         rank.className = "rank";
-         rank.textContent = doisDigitos(i + 1);
-         card.appendChild(rank);
-       }
+       if (comRanking) card.appendChild(novo("span", "rank", doisDigitos(i + 1)));
        container.appendChild(card);
      }
    }
-   
+
+   // Caixa de "lista vazia" com um botão opcional
    function mostrarVazio(container, mensagem, textoBotao, destino) {
      container.textContent = "";
-     var caixa = document.createElement("div");
-     caixa.className = "vazio";
-     var texto = document.createElement("p");
-     texto.textContent = mensagem;
-     caixa.appendChild(texto);
-     if (textoBotao) {
-       var botao = document.createElement("a");
-       botao.className = "btn btn--acento";
-       botao.href = destino;
-       botao.textContent = textoBotao;
-       caixa.appendChild(botao);
-     }
+     var caixa = novo("div", "vazio");
+     caixa.appendChild(novo("p", null, mensagem));
+     if (textoBotao) caixa.appendChild(novoLink("btn btn--acento", textoBotao, destino));
      container.appendChild(caixa);
    }
    
@@ -872,8 +856,7 @@
      var cabecalho = document.querySelector(".cabecalho");
      if (!cabecalho) return;
    
-     var barra = document.createElement("span");
-     barra.className = "progresso-scroll";
+     var barra = novo("span", "progresso-scroll");
      cabecalho.appendChild(barra);
    
      window.addEventListener("scroll", function () {
@@ -888,8 +871,7 @@
      var menu = document.getElementById("menu");
      if (!menu) return;
    
-     var indicador = document.createElement("span");
-     indicador.className = "menu__indicador";
+     var indicador = novo("span", "menu__indicador");
      menu.appendChild(indicador);
    
      // offsetLeft/offsetWidth dizem onde o link está dentro do menu.
@@ -958,8 +940,7 @@
      var form = document.getElementById("buscaTopo");
      if (!campo || !form) return;
    
-     var caixa = document.createElement("div");
-     caixa.className = "sugestoes";
+     var caixa = novo("div", "sugestoes");
      form.appendChild(caixa);
    
      function fechar() {
@@ -975,10 +956,7 @@
    
        var achados = procurarProdutos(termo).slice(0, 5);
        if (achados.length === 0) {
-         var vazio = document.createElement("p");
-         vazio.className = "sugestoes__vazio";
-         vazio.textContent = "Nada encontrado para “" + campo.value.trim() + "”";
-         caixa.appendChild(vazio);
+         caixa.appendChild(novo("p", "sugestoes__vazio", "Nada encontrado para “" + campo.value.trim() + "”"));
        } else {
          var i;
          for (i = 0; i < achados.length; i++) {
@@ -1033,25 +1011,12 @@
    }
    
    function criarSugestao(produto, posicao) {
-     var link = document.createElement("a");
-     link.className = "sugestao";
-     link.href = PASTA_PAGINAS + "produto.html?id=" + produto.id;
+     var link = novoLink("sugestao", null, linkDoProduto(produto));
      link.style.animationDelay = (posicao * 0.05) + "s";
-   
-     var foto = document.createElement("img");
-     foto.src = urlImagem(produto.imagem);
-     foto.alt = produto.nome;
-     foto.loading = "lazy";
-   
-     var info = document.createElement("div");
-     var nome = document.createElement("strong");
-     nome.textContent = produto.nome;
-     var preco = document.createElement("span");
-     preco.textContent = produto.categoria + " · " + formatarPreco(produto.preco);
-     info.appendChild(nome);
-     info.appendChild(preco);
-   
-     link.appendChild(foto);
+     var info = novo("div");
+     info.appendChild(novo("strong", null, produto.nome));
+     info.appendChild(novo("span", null, produto.categoria + " · " + formatarPreco(produto.preco)));
+     link.appendChild(novaImagem(produto.imagem, produto.nome));
      link.appendChild(info);
      return link;
    }
@@ -1064,10 +1029,8 @@
      var atalho = document.querySelector('.acoes a[href*="carrinho.html"]');
      if (!atalho) return;
    
-     var cortina = document.createElement("div");
-     cortina.className = "cortina";
-     var gaveta = document.createElement("aside");
-     gaveta.className = "gaveta";
+     var cortina = novo("div", "cortina");
+     var gaveta = novo("aside", "gaveta");
      gaveta.setAttribute("aria-label", "Resumo do carrinho");
      document.body.appendChild(cortina);
      document.body.appendChild(gaveta);
@@ -1103,129 +1066,71 @@
      gaveta.textContent = "";
    
      // cabeçalho da gaveta
-     var topo = document.createElement("div");
-     topo.className = "gaveta__topo";
-     var titulo = document.createElement("h2");
-     titulo.textContent = "Seu carrinho";
-     var botaoFechar = document.createElement("button");
-     botaoFechar.type = "button";
-     botaoFechar.className = "gaveta__fechar";
+     var topo = novo("div", "gaveta__topo");
+     topo.appendChild(novo("h2", null, "Seu carrinho"));
+     var botaoFechar = novoBotao("gaveta__fechar", null, fechar);
      botaoFechar.setAttribute("aria-label", "Fechar carrinho");
      botaoFechar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 19 19M19 5 5 19"/></svg>';
-     botaoFechar.addEventListener("click", fechar);
-     topo.appendChild(titulo);
      topo.appendChild(botaoFechar);
      gaveta.appendChild(topo);
-   
+
      var itens = lerCarrinho();
-   
      if (itens.length === 0) {
-       var vazio = document.createElement("div");
-       vazio.className = "gaveta__vazio";
-       var texto = document.createElement("p");
-       texto.textContent = "Ainda não tem nada aqui.";
-       var ir = document.createElement("a");
-       ir.className = "btn btn--acento";
-       ir.href = PASTA_PAGINAS + "produtos.html";
-       ir.textContent = "Ver catálogo";
-       vazio.appendChild(texto);
-       vazio.appendChild(ir);
+       var vazio = novo("div", "gaveta__vazio");
+       vazio.appendChild(novo("p", null, "Ainda não tem nada aqui."));
+       vazio.appendChild(novoLink("btn btn--acento", "Ver catálogo", PASTA_PAGINAS + "produtos.html"));
        gaveta.appendChild(vazio);
        return;
      }
-   
-     var lista = document.createElement("div");
-     lista.className = "gaveta__lista";
-     var i;
-     for (i = 0; i < itens.length; i++) {
-       (function (item, posicao) {
-         var produto = buscarProduto(item.idProduto);
-         if (!produto) return;
-   
-         var linha = document.createElement("article");
-         linha.className = "gaveta__item";
-         linha.style.animationDelay = (posicao * 0.06) + "s";
-   
-         var foto = document.createElement("img");
-         foto.src = urlImagem(produto.imagem);
-         foto.alt = produto.nome;
-         foto.loading = "lazy";
-   
-         var info = document.createElement("div");
-         var nome = document.createElement("strong");
-         nome.textContent = produto.nome;
-         var detalhe = document.createElement("span");
-         detalhe.textContent = "Tam " + item.tamanho + " · " + item.quantidade + "x";
-         var preco = document.createElement("span");
-         preco.className = "gaveta__preco";
-         preco.textContent = formatarPreco(produto.preco * item.quantidade);
-         info.appendChild(nome);
-         info.appendChild(detalhe);
-         info.appendChild(preco);
-   
-         var tirar = document.createElement("button");
-         tirar.type = "button";
-         tirar.className = "gaveta__tirar";
-         tirar.setAttribute("aria-label", "Remover " + produto.nome);
-         tirar.textContent = "Remover";
-         tirar.addEventListener("click", function () {
-           removerDoCarrinho(posicao);
-           atualizarContadores();
-           reanimar(document.getElementById("contadorCarrinho"), "pulsa");
-           desenharGaveta(gaveta, fechar); // redesenha a gaveta na hora
-           mostrarToast("Item removido");
-         });
-   
-         linha.appendChild(foto);
-         linha.appendChild(info);
-         linha.appendChild(tirar);
-         lista.appendChild(linha);
-       })(itens[i], i);
-     }
+
+     var lista = novo("div", "gaveta__lista");
+     itens.forEach(function (item, posicao) {
+       var produto = buscarProduto(item.idProduto);
+       if (!produto) return;
+
+       var linha = novo("article", "gaveta__item");
+       linha.style.animationDelay = (posicao * 0.06) + "s";
+       var info = novo("div");
+       info.appendChild(novo("strong", null, produto.nome));
+       info.appendChild(novo("span", null, "Tam " + item.tamanho + " · " + item.quantidade + "x"));
+       info.appendChild(novo("span", "gaveta__preco", formatarPreco(produto.preco * item.quantidade)));
+
+       var tirar = novoBotao("gaveta__tirar", "Remover", function () {
+         removerDoCarrinho(posicao);
+         atualizarContadores();
+         reanimar(document.getElementById("contadorCarrinho"), "pulsa");
+         desenharGaveta(gaveta, fechar); // redesenha a gaveta na hora
+         mostrarToast("Item removido");
+       });
+       tirar.setAttribute("aria-label", "Remover " + produto.nome);
+
+       linha.appendChild(novaImagem(produto.imagem, produto.nome));
+       linha.appendChild(info);
+       linha.appendChild(tirar);
+       lista.appendChild(linha);
+     });
      gaveta.appendChild(lista);
-   
+
      // rodapé: barra de frete + subtotal + botões
      var subtotal = calcularSubtotal();
-     var rodape = document.createElement("div");
-     rodape.className = "gaveta__rodape";
-   
-     var freteTexto = document.createElement("p");
-     freteTexto.className = "gaveta__frete";
-     freteTexto.textContent = subtotal >= FRETE_GRATIS
+     var rodape = novo("div", "gaveta__rodape");
+     rodape.appendChild(novo("p", "gaveta__frete", subtotal >= FRETE_GRATIS
        ? "Frete grátis liberado."
-       : "Faltam " + formatarPreco(FRETE_GRATIS - subtotal) + " para o frete grátis";
-   
-     var barra = document.createElement("div");
-     barra.className = "frete__barra";
-     var progresso = document.createElement("span");
+       : "Faltam " + formatarPreco(FRETE_GRATIS - subtotal) + " para o frete grátis"));
+
+     var barra = novo("div", "frete__barra");
+     var progresso = novo("span");
      progresso.style.width = Math.min(100, Math.round(subtotal / FRETE_GRATIS * 100)) + "%";
      barra.appendChild(progresso);
-   
-     var linhaTotal = document.createElement("div");
-     linhaTotal.className = "gaveta__total";
-     var rotuloTotal = document.createElement("span");
-     rotuloTotal.textContent = "Subtotal";
-     var valorTotal = document.createElement("strong");
-     valorTotal.textContent = formatarPreco(subtotal);
-     linhaTotal.appendChild(rotuloTotal);
-     linhaTotal.appendChild(valorTotal);
-   
-     var irCarrinho = document.createElement("a");
-     irCarrinho.className = "btn btn--acento btn--bloco";
-     irCarrinho.href = PASTA_PAGINAS + "carrinho.html";
-     irCarrinho.textContent = "Fechar pedido";
-   
-     var continuar = document.createElement("button");
-     continuar.type = "button";
-     continuar.className = "gaveta__continuar";
-     continuar.textContent = "Continuar comprando";
-     continuar.addEventListener("click", fechar);
-   
-     rodape.appendChild(freteTexto);
      rodape.appendChild(barra);
+
+     var linhaTotal = novo("div", "gaveta__total");
+     linhaTotal.appendChild(novo("span", null, "Subtotal"));
+     linhaTotal.appendChild(novo("strong", null, formatarPreco(subtotal)));
      rodape.appendChild(linhaTotal);
-     rodape.appendChild(irCarrinho);
-     rodape.appendChild(continuar);
+
+     rodape.appendChild(novoLink("btn btn--acento btn--bloco", "Fechar pedido", PASTA_PAGINAS + "carrinho.html"));
+     rodape.appendChild(novoBotao("gaveta__continuar", "Continuar comprando", fechar));
      gaveta.appendChild(rodape);
    }
    
@@ -1269,13 +1174,8 @@
      var usuario = usuarioLogado();
      var menu = document.getElementById("menu");
      if (!usuario || usuario.tipo !== "admin" || !menu) return;
-     var pagina = document.body.dataset.pagina;
-
-     var link = document.createElement("a");
-     link.href = PASTA_PAGINAS + "admin.html";
-     link.textContent = "Dashboard";
-     link.className = "menu__admin" + (pagina === "admin" ? " ativo" : "");
-     menu.appendChild(link);
+     var ativo = document.body.dataset.pagina === "admin" ? " ativo" : "";
+     menu.appendChild(novoLink("menu__admin" + ativo, "Dashboard", PASTA_PAGINAS + "admin.html"));
    }
    
    // O localStorage avisa as OUTRAS abas quando uma chave muda (evento "storage").
@@ -1460,14 +1360,6 @@
        miniaturas: miniaturas,
        destino: PASTA_PAGINAS + "produtos.html?colecao=" + encodeURIComponent(nome)
      };
-   }
-   
-   // atalho para montar elemento + classe + texto numa linha
-   function novo(tag, classe, texto) {
-     var el = document.createElement(tag);
-     if (classe) el.className = classe;
-     if (texto !== undefined && texto !== null) el.textContent = texto;
-     return el;
    }
    
    // Quebra cada linha do título em letras para subirem uma a uma.
@@ -1774,14 +1666,11 @@
      var trilho = caixa.querySelector(".atalhos");
    
      function criarSeta(classe, rotulo, desenho, direcao) {
-       var seta = document.createElement("button");
-       seta.type = "button";
-       seta.className = "atalhos__seta " + classe;
-       seta.setAttribute("aria-label", rotulo);
-       seta.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + desenho + '"/></svg>';
-       seta.addEventListener("click", function () {
+       var seta = novoBotao("atalhos__seta " + classe, null, function () {
          trilho.scrollBy({ left: direcao * trilho.clientWidth * 0.9, behavior: "smooth" });
        });
+       seta.setAttribute("aria-label", rotulo);
+       seta.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + desenho + '"/></svg>';
        caixa.appendChild(seta);
        return seta;
      }
@@ -1893,14 +1782,14 @@
      return valores;
    }
    
+   function novaOpcao(valor, texto) {
+     var opcao = novo("option", null, texto);
+     opcao.value = valor;
+     return opcao;
+   }
+
    function preencherSelect(select, valores) {
-     var i;
-     for (i = 0; i < valores.length; i++) {
-       var opcao = document.createElement("option");
-       opcao.value = valores[i];
-       opcao.textContent = valores[i];
-       select.appendChild(opcao);
-     }
+     valores.forEach(function (valor) { select.appendChild(novaOpcao(valor, valor)); });
    }
    
    function ordenar(lista, criterio) {
@@ -1935,123 +1824,72 @@
      montarVistos(produto.id);
    }
    
+   // Controle "−  1  +" usado na página do produto e no carrinho.
+   // aoMudar(passo) recebe -1 ou +1; quem chama decide o que fazer com isso.
+   function criarControleQuantidade(valor, nomeProduto, aoMudar) {
+     var caixa = novo("div", "quantidade");
+     var sufixo = nomeProduto ? " de " + nomeProduto : "";
+     var menos = novoBotao(null, "−", function () { aoMudar(-1); });
+     menos.setAttribute("aria-label", "Diminuir quantidade" + sufixo);
+     var mais = novoBotao(null, "+", function () { aoMudar(1); });
+     mais.setAttribute("aria-label", "Aumentar quantidade" + sufixo);
+     caixa.appendChild(menos);
+     caixa.appendChild(novo("span", null, String(valor)));
+     caixa.appendChild(mais);
+     return caixa;
+   }
+
    function montarDetalhe(caixa, produto) {
      caixa.textContent = "";
-   
-     // coluna da foto
-     var ladoFoto = document.createElement("div");
-     ladoFoto.className = "detalhe__foto";
-     var foto = document.createElement("img");
+
+     // coluna da foto (a principal não usa lazy: é o primeiro que aparece)
+     var ladoFoto = novo("div", "detalhe__foto");
+     var foto = novo("img");
      foto.src = urlImagem(produto.imagem);
      foto.alt = produto.nome + " na cor " + produto.cor;
      ladoFoto.appendChild(foto);
      var desconto = calcularDesconto(produto);
-     if (desconto > 0) {
-       var selo = document.createElement("span");
-       selo.className = "selo";
-       selo.textContent = "-" + desconto + "%";
-       ladoFoto.appendChild(selo);
-     }
-   
+     if (desconto > 0) ladoFoto.appendChild(novo("span", "selo", "-" + desconto + "%"));
+
      // coluna das informações
-     var lado = document.createElement("div");
-     lado.className = "detalhe__info";
-   
-     var categoria = document.createElement("p");
-     categoria.className = "rotulo";
-     categoria.textContent = produto.categoria + (produto.colecao ? " · Coleção " + produto.colecao : "");
-   
-     var titulo = document.createElement("h1");
-     titulo.textContent = produto.nome;
-   
-     var precos = document.createElement("p");
-     precos.className = "detalhe__preco";
-     if (produto.precoAntigo) {
-       var antigo = document.createElement("s");
-       antigo.textContent = formatarPreco(produto.precoAntigo);
-       precos.appendChild(antigo);
-     }
-     var atual = document.createElement("strong");
-     atual.textContent = formatarPreco(produto.preco);
-     precos.appendChild(atual);
-   
+     var lado = novo("div", "detalhe__info");
+     lado.appendChild(novo("p", "rotulo", produto.categoria + (produto.colecao ? " · Coleção " + produto.colecao : "")));
+     lado.appendChild(novo("h1", null, produto.nome));
+     lado.appendChild(criarPrecos("detalhe__preco", produto));
      // DIFERENCIAL 13: parcelamento calculado
-     var parcela = document.createElement("p");
-     parcela.className = "detalhe__parcela";
-     parcela.textContent = "ou " + PARCELAS + "x de " + formatarPreco(produto.preco / PARCELAS) + " sem juros";
-   
-     var descricao = document.createElement("p");
-     descricao.className = "detalhe__descricao";
-     descricao.textContent = produto.descricao;
-   
-     var cor = document.createElement("p");
-     cor.className = "detalhe__cor";
-     cor.textContent = "Cor: " + produto.cor;
-   
+     lado.appendChild(novo("p", "detalhe__parcela", "ou " + PARCELAS + "x de " + formatarPreco(produto.preco / PARCELAS) + " sem juros"));
+     lado.appendChild(novo("p", "detalhe__descricao", produto.descricao));
+     lado.appendChild(novo("p", "detalhe__cor", "Cor: " + produto.cor));
+
      // seletor de tamanho (obrigatório)
-     var rotuloTamanho = document.createElement("p");
-     rotuloTamanho.className = "rotulo";
-     rotuloTamanho.textContent = "Tamanho";
-   
-     var tamanhos = document.createElement("div");
-     tamanhos.className = "tamanhos";
+     lado.appendChild(novo("p", "rotulo", "Tamanho"));
+     var tamanhos = novo("div", "tamanhos");
      var escolhido = "";
-     var i;
-     for (i = 0; i < produto.tamanhos.length; i++) {
-       (function (valor) {
-         var botao = document.createElement("button");
-         botao.type = "button";
-         botao.className = "tamanho";
-         botao.textContent = valor;
-         botao.addEventListener("click", function () {
-           var ativos = tamanhos.querySelectorAll(".tamanho");
-           var j;
-           for (j = 0; j < ativos.length; j++) ativos[j].classList.remove("ativo");
-           botao.classList.add("ativo");
-           escolhido = valor;
-           aviso.textContent = "";
-         });
-         tamanhos.appendChild(botao);
-       })(produto.tamanhos[i]);
-     }
-   
+     produto.tamanhos.forEach(function (valor) {
+       var botao = novoBotao("tamanho", valor, function () {
+         var ativo = tamanhos.querySelector(".tamanho.ativo");
+         if (ativo) ativo.classList.remove("ativo");
+         botao.classList.add("ativo");
+         escolhido = valor;
+         aviso.textContent = "";
+       });
+       tamanhos.appendChild(botao);
+     });
+     lado.appendChild(tamanhos);
+
      // quantidade
      var quantidade = 1;
-     var caixaQtd = document.createElement("div");
-     caixaQtd.className = "quantidade";
-     var menos = document.createElement("button");
-     menos.type = "button";
-     menos.textContent = "−";
-     menos.setAttribute("aria-label", "Diminuir quantidade");
-     var numero = document.createElement("span");
-     numero.textContent = "1";
-     var mais = document.createElement("button");
-     mais.type = "button";
-     mais.textContent = "+";
-     mais.setAttribute("aria-label", "Aumentar quantidade");
-     menos.addEventListener("click", function () {
-       if (quantidade > 1) quantidade--;
-       numero.textContent = quantidade;
+     var caixaQtd = criarControleQuantidade(1, "", function (passo) {
+       quantidade = Math.max(1, quantidade + passo);
+       caixaQtd.querySelector("span").textContent = quantidade;
      });
-     mais.addEventListener("click", function () {
-       quantidade++;
-       numero.textContent = quantidade;
-     });
-     caixaQtd.appendChild(menos);
-     caixaQtd.appendChild(numero);
-     caixaQtd.appendChild(mais);
-   
-     var aviso = document.createElement("p");
-     aviso.className = "erro";
-   
-     var botoes = document.createElement("div");
-     botoes.className = "detalhe__botoes";
-   
-     var btnComprar = document.createElement("button");
-     btnComprar.className = "btn btn--acento";
-     btnComprar.type = "button";
-     btnComprar.textContent = "Adicionar ao carrinho";
-     btnComprar.addEventListener("click", function () {
+     lado.appendChild(caixaQtd);
+
+     var aviso = novo("p", "erro");
+     lado.appendChild(aviso);
+
+     var botoes = novo("div", "detalhe__botoes");
+     botoes.appendChild(novoBotao("btn btn--acento", "Adicionar ao carrinho", function () {
        if (!escolhido) {
          aviso.textContent = "Escolha um tamanho antes de adicionar.";
          return;
@@ -2061,59 +1899,25 @@
        reanimar(document.getElementById("contadorCarrinho"), "pulsa");
        mostrarToast(produto.nome + " (" + escolhido + ") no carrinho");
        if (abrirGaveta) abrirGaveta(); // mostra o mini-carrinho na hora
+     }));
+
+     var btnFavorito = novoBotao("btn btn--vazado", ehFavorito(produto.id) ? "Remover dos favoritos" : "Favoritar", function () {
+       btnFavorito.textContent = favoritar(produto.id) ? "Remover dos favoritos" : "Favoritar";
      });
-   
-     var btnFavorito = document.createElement("button");
-     btnFavorito.className = "btn btn--vazado";
-     btnFavorito.type = "button";
-     btnFavorito.textContent = ehFavorito(produto.id) ? "Remover dos favoritos" : "Favoritar";
-     btnFavorito.addEventListener("click", function () {
-       var virou = alternarFavorito(produto.id);
-       btnFavorito.textContent = virou ? "Remover dos favoritos" : "Favoritar";
-       atualizarContadores();
-       reanimar(document.getElementById("contadorFavoritos"), "pulsa");
-       mostrarToast(virou ? "Salvo nos favoritos" : "Removido dos favoritos");
-     });
-   
-     botoes.appendChild(btnComprar);
      botoes.appendChild(btnFavorito);
-   
+
      // Editar produto: só aparece para o administrador
      var usuario = usuarioLogado();
      if (usuario && usuario.tipo === "admin") {
-       var btnEditar = document.createElement("a");
-       btnEditar.className = "btn btn--claro detalhe__editar";
-       btnEditar.href = PASTA_PAGINAS + "admin.html?editar=" + produto.id;
-       btnEditar.textContent = "Editar produto";
-       botoes.appendChild(btnEditar);
+       botoes.appendChild(novoLink("btn btn--claro detalhe__editar", "Editar produto", PASTA_PAGINAS + "admin.html?editar=" + produto.id));
      }
-   
-     var entrega = document.createElement("ul");
-     entrega.className = "detalhe__lista";
-     var itens = [
-       "Frete grátis acima de " + formatarPreco(FRETE_GRATIS),
-       "Troca em até 30 dias",
-       "Enviado em até 24h úteis"
-     ];
-     for (i = 0; i < itens.length; i++) {
-       var li = document.createElement("li");
-       li.textContent = itens[i];
-       entrega.appendChild(li);
-     }
-   
-     lado.appendChild(categoria);
-     lado.appendChild(titulo);
-     lado.appendChild(precos);
-     lado.appendChild(parcela);
-     lado.appendChild(descricao);
-     lado.appendChild(cor);
-     lado.appendChild(rotuloTamanho);
-     lado.appendChild(tamanhos);
-     lado.appendChild(caixaQtd);
-     lado.appendChild(aviso);
      lado.appendChild(botoes);
+
+     var entrega = novo("ul", "detalhe__lista");
+     ["Frete grátis acima de " + formatarPreco(FRETE_GRATIS), "Troca em até 30 dias", "Enviado em até 24h úteis"]
+       .forEach(function (texto) { entrega.appendChild(novo("li", null, texto)); });
      lado.appendChild(entrega);
-   
+
      caixa.appendChild(ladoFoto);
      caixa.appendChild(lado);
    }
@@ -2153,7 +1957,7 @@
    
    /* --- CARRINHO --- */
    function iniciarCarrinho() {
-     if (!exigirLogin()) return;
+     // Visitante pode montar e ver o carrinho; o login só é exigido ao finalizar.
    
      var lista = document.getElementById("listaCarrinho");
      var resumo = document.getElementById("resumo");
@@ -2224,6 +2028,17 @@
      document.getElementById("btnFinalizar").addEventListener("click", function () {
        var itens = lerCarrinho();
        if (itens.length === 0) return;
+
+       // sem conta não fecha pedido: mostra o aviso com "Entrar" e "Criar conta"
+       var avisoConta = document.getElementById("avisoConta");
+       if (!usuarioLogado()) {
+         avisoConta.hidden = false;
+         reanimar(avisoConta, "aviso-conta--novo");
+         avisoConta.focus();
+         return;
+       }
+       avisoConta.hidden = true;
+
        salvarPedido(cupomAtivo);
        salvarCarrinho([]);
        cupomAtivo = null;
@@ -2237,72 +2052,27 @@
    
    function criarLinhaCarrinho(item, posicao, redesenhar) {
      var produto = buscarProduto(item.idProduto);
-     var linha = document.createElement("article");
-     linha.className = "item";
-   
-     if (!produto) {
-       linha.textContent = "Peça removida do catálogo.";
-       return linha;
-     }
-   
-     var foto = document.createElement("img");
-     foto.src = urlImagem(produto.imagem);
-     foto.alt = produto.nome;
-     foto.loading = "lazy";
-   
-     var info = document.createElement("div");
-     info.className = "item__info";
-   
-     var nome = document.createElement("h3");
-     var linkNome = document.createElement("a");
-     linkNome.href = PASTA_PAGINAS + "produto.html?id=" + produto.id;
-     linkNome.textContent = produto.nome;
-     nome.appendChild(linkNome);
-   
-     var detalhe = document.createElement("p");
-     detalhe.className = "item__detalhe";
-     detalhe.textContent = "Tamanho " + item.tamanho + " · " + produto.cor;
-   
-     var preco = document.createElement("p");
-     preco.className = "item__preco";
-     preco.textContent = formatarPreco(produto.preco * item.quantidade);
-   
-     var controles = document.createElement("div");
-     controles.className = "quantidade";
-     var menos = document.createElement("button");
-     menos.type = "button";
-     menos.textContent = "−";
-     menos.setAttribute("aria-label", "Diminuir quantidade de " + produto.nome);
-     var numero = document.createElement("span");
-     numero.textContent = item.quantidade;
-     var mais = document.createElement("button");
-     mais.type = "button";
-     mais.textContent = "+";
-     mais.setAttribute("aria-label", "Aumentar quantidade de " + produto.nome);
-     menos.addEventListener("click", function () { mudarQuantidade(posicao, -1); redesenhar(); });
-     mais.addEventListener("click", function () { mudarQuantidade(posicao, 1); redesenhar(); });
-     controles.appendChild(menos);
-     controles.appendChild(numero);
-     controles.appendChild(mais);
-   
-     var remover = document.createElement("button");
-     remover.type = "button";
-     remover.className = "item__remover";
-     remover.textContent = "Remover";
-     remover.addEventListener("click", function () {
+     if (!produto) return novo("article", "item", "Peça removida do catálogo.");
+
+     var info = novo("div", "item__info");
+     var nome = novo("h3");
+     nome.appendChild(novoLink(null, produto.nome, linkDoProduto(produto)));
+     info.appendChild(nome);
+     info.appendChild(novo("p", "item__detalhe", "Tamanho " + item.tamanho + " · " + produto.cor));
+     info.appendChild(criarControleQuantidade(item.quantidade, produto.nome, function (passo) {
+       mudarQuantidade(posicao, passo);
+       redesenhar();
+     }));
+     info.appendChild(novoBotao("item__remover", "Remover", function () {
        removerDoCarrinho(posicao);
        redesenhar();
        mostrarToast("Item removido");
-     });
-   
-     info.appendChild(nome);
-     info.appendChild(detalhe);
-     info.appendChild(controles);
-     info.appendChild(remover);
-   
-     linha.appendChild(foto);
+     }));
+
+     var linha = novo("article", "item");
+     linha.appendChild(novaImagem(produto.imagem, produto.nome));
      linha.appendChild(info);
-     linha.appendChild(preco);
+     linha.appendChild(novo("p", "item__preco", formatarPreco(produto.preco * item.quantidade)));
      return linha;
    }
    
@@ -2409,7 +2179,16 @@
      abaEntrar.addEventListener("click", function () { trocarAba(false); });
      abaCriar.addEventListener("click", function () { trocarAba(true); });
 
-     iniciarAcessoDemo(trocarAba);
+     // veio do botão "Criar conta" do carrinho: abre direto na aba de cadastro
+     var querCriarConta = parametroDaUrl("aba") === "criar";
+     if (querCriarConta) trocarAba(true);
+     if (parametroDaUrl("voltar") === "carrinho.html") {
+       mostrarToast(querCriarConta
+         ? "Crie sua conta para finalizar o pedido. O carrinho fica guardado."
+         : "Entre na sua conta para finalizar o pedido. O carrinho fica guardado.");
+     }
+
+     iniciarAcessoDemo(trocarAba, !querCriarConta);
    
      // atalho pra apresentação: enche o cadastro com um consumidor pronto
      document.getElementById("btnDadosExemplo").addEventListener("click", function () {
@@ -2426,6 +2205,8 @@
        document.getElementById("cadSenha").value = exemplo.senha;
        document.getElementById("cadSenha2").value = exemplo.senha;
        document.getElementById("erroCadastro").textContent = "";
+       conferirEmail();
+       conferirSenha();
        mostrarToast("Dados de exemplo prontos. Senha: " + exemplo.senha);
      });
    
@@ -2445,22 +2226,58 @@
        setTimeout(irParaDestino, 600);
      });
    
+     // VALIDAÇÃO AO VIVO DO CADASTRO
+     var campoCadEmail = document.getElementById("cadEmail");
+     var avisoCadEmail = document.getElementById("avisoCadEmail");
+     var campoCadSenha = document.getElementById("cadSenha");
+
+     // e-mail: avisa ao sair do campo e, depois disso, a cada letra digitada
+     function conferirEmail() {
+       var problema = problemaDoEmail(campoCadEmail.value.trim());
+       avisoCadEmail.textContent = problema;
+       campoCadEmail.classList.toggle("campo--invalido", problema !== "");
+       return problema;
+     }
+     campoCadEmail.addEventListener("blur", conferirEmail);
+     campoCadEmail.addEventListener("input", function () {
+       if (avisoCadEmail.textContent) conferirEmail();
+     });
+
+     // senha: marca cada regra cumprida e mostra a força enquanto digita
+     function conferirSenha() {
+       var senha = campoCadSenha.value;
+       var regras = regrasDaSenha(senha);
+       var itens = document.querySelectorAll("#regrasSenha li");
+       var i;
+       for (i = 0; i < itens.length; i++) {
+         itens[i].classList.toggle("ok", regras[itens[i].dataset.regra]);
+       }
+       var forca = document.getElementById("forcaSenha");
+       var nivel = forcaDaSenha(senha);
+       forca.hidden = senha === "";
+       forca.textContent = nivel.texto;
+       forca.className = "forca-senha forca-senha--" + nivel.classe;
+       campoCadSenha.classList.toggle("campo--invalido", senha !== "" && nivel.classe !== "forte");
+     }
+     campoCadSenha.addEventListener("input", conferirSenha);
+
      painelCriar.addEventListener("submit", function (evento) {
        evento.preventDefault();
        var erro = document.getElementById("erroCadastro");
        var nome = document.getElementById("cadNome").value.trim();
-       var email = document.getElementById("cadEmail").value.trim();
-       var senha = document.getElementById("cadSenha").value;
+       var email = campoCadEmail.value.trim();
+       var senha = campoCadSenha.value;
        var senha2 = document.getElementById("cadSenha2").value;
-   
+       var problemaEmail = conferirEmail();
+       conferirSenha();
+
        if (nome.length < 2) { erro.textContent = "Escreva seu nome."; return; }
-       if (!emailValido(email)) { erro.textContent = "Digite um e-mail válido."; return; }
-       if (senha.length < 6) { erro.textContent = "A senha precisa de pelo menos 6 caracteres."; return; }
+       if (problemaEmail) { erro.textContent = problemaEmail; campoCadEmail.focus(); return; }
+       if (problemaDaSenha(senha)) { erro.textContent = problemaDaSenha(senha); campoCadSenha.focus(); return; }
        if (senha !== senha2) { erro.textContent = "As duas senhas não são iguais."; return; }
        if (buscarUsuarioPorEmail(email)) { erro.textContent = "Esse e-mail já tem conta."; return; }
-   
-       var usuarios = lerUsuarios();
-       salvarUsuario({ id: usuarios.length + 1, nome: nome, email: email, senha: senha, tipo: "cliente" });
+
+       salvarUsuario({ id: proximoId(lerUsuarios()), nome: nome, email: email, senha: senha, tipo: "cliente" });
        fazerLogin(email, senha);
    
        erro.textContent = "";
@@ -2474,21 +2291,12 @@
    // Garante que cada conta de CONTAS_DEMO exista na "base" (verso_usuarios).
    // Não mexe em quem já existe: só acrescenta a que estiver faltando.
    function garantirContasDemo() {
-     var usuarios = lerUsuarios();
-     var maiorId = 0;
-     var mudou = false;
      var i;
-     for (i = 0; i < usuarios.length; i++) {
-       if (usuarios[i].id > maiorId) maiorId = usuarios[i].id;
-     }
      for (i = 0; i < CONTAS_DEMO.length; i++) {
        var conta = CONTAS_DEMO[i];
        if (buscarUsuarioPorEmail(conta.email)) continue;
-       maiorId++;
-       usuarios.push({ id: maiorId, nome: conta.nome, email: conta.email, senha: conta.senha, tipo: conta.tipo });
-       mudou = true;
+       salvarUsuario({ id: proximoId(lerUsuarios()), nome: conta.nome, email: conta.email, senha: conta.senha, tipo: conta.tipo });
      }
-     if (mudou) salvarStorage("verso_usuarios", usuarios);
    }
 
    // ícones fixos (traço, no mesmo estilo dos ícones da navbar)
@@ -2537,7 +2345,7 @@
      });
    }
 
-   function iniciarAcessoDemo(trocarAba) {
+   function iniciarAcessoDemo(trocarAba, abrirAoCarregar) {
      var modal = document.getElementById("modalDemo");
      var btnAbrir = document.getElementById("btnAcessoDemo");
      if (!modal || !btnAbrir) return;
@@ -2617,15 +2425,58 @@
 
      btnAbrir.addEventListener("click", abrir);
 
-     // abre sozinho ao chegar na tela de login
-     abrir();
+     // abre sozinho ao chegar na tela de login (menos quando a pessoa veio para se cadastrar)
+     if (abrirAoCarregar) abrir();
    }
 
-   // validação simples de e-mail: tem texto, @, texto, ponto e texto
-   function emailValido(email) {
+   /* --- REGRAS DE E-MAIL E SENHA (usadas no cadastro; o login usa emailValido) --- */
+
+   // Devolve o que está errado no e-mail, ou "" se estiver certo.
+   function problemaDoEmail(email) {
      var arroba = email.indexOf("@");
-     var ponto = email.lastIndexOf(".");
-     return arroba > 0 && ponto > arroba + 1 && ponto < email.length - 1;
+     var dominio = email.slice(arroba + 1);
+     if (email === "") return "Digite seu e-mail.";
+     if (email.indexOf(" ") !== -1) return "E-mail inválido: não pode ter espaços.";
+     if (arroba === -1) return "E-mail inválido: está faltando o @ (ex.: voce@email.com).";
+     if (email.indexOf("@", arroba + 1) !== -1) return "E-mail inválido: use só um @.";
+     if (arroba === 0) return "E-mail inválido: falta o nome antes do @.";
+     var ponto = dominio.lastIndexOf(".");
+     if (ponto < 1 || ponto === dominio.length - 1) {
+       return "E-mail inválido: falta o domínio depois do @ (ex.: @gmail.com).";
+     }
+     return "";
+   }
+
+   function emailValido(email) {
+     return problemaDoEmail(email) === "";
+   }
+
+   // Padrão da senha: 6+ caracteres, 1 letra maiúscula e 1 caractere especial
+   function regrasDaSenha(senha) {
+     return {
+       tamanho: senha.length >= 6,
+       maiuscula: /[A-ZÀ-Ý]/.test(senha),
+       especial: /[^A-Za-zÀ-ÿ0-9\s]/.test(senha)   // tudo que não é letra, número ou espaço
+     };
+   }
+
+   function forcaDaSenha(senha) {
+     var regras = regrasDaSenha(senha);
+     var cumpridas = (regras.tamanho ? 1 : 0) + (regras.maiuscula ? 1 : 0) + (regras.especial ? 1 : 0);
+     if (cumpridas === 3) return { classe: "forte", texto: "Senha forte: segue o padrão." };
+     if (senha.length < 5 || cumpridas <= 1) return { classe: "muito-fraca", texto: "Senha muito fraca: não segue o padrão." };
+     return { classe: "fraca", texto: "Senha fraca: não segue o padrão." };
+   }
+
+   // Devolve a mensagem de erro da senha, ou "" se ela seguir o padrão.
+   function problemaDaSenha(senha) {
+     var regras = regrasDaSenha(senha);
+     var faltando = [];
+     if (!regras.tamanho) faltando.push("mínimo de 6 caracteres");
+     if (!regras.maiuscula) faltando.push("uma letra maiúscula");
+     if (!regras.especial) faltando.push("um caractere especial");
+     if (faltando.length === 0) return "";
+     return forcaDaSenha(senha).texto + " Falta: " + faltando.join(", ") + ".";
    }
    
    function irParaDestino() {
@@ -3042,7 +2893,7 @@
      var original = idEmEdicao !== null ? buscarProduto(idEmEdicao) : null;
 
      var peca = {
-       id: original ? original.id : proximoIdProduto(),
+       id: original ? original.id : proximoId(lerProdutos()),
        nome: nome,
        categoria: document.getElementById("pCategoria").value,
        preco: preco,

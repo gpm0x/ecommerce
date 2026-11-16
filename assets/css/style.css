@@ -1898,6 +1898,83 @@
     margin: -10px 0 14px;
   }
 
+  /* --- cadastro: validação ao vivo de e-mail e senha --- */
+  .campo input.campo--invalido { border-color: #FF4D37; }
+  .aviso-campo {
+    margin: 0;
+    min-height: 1.1em;
+    font-size: .76rem;
+    font-weight: 600;
+    color: #FF4D37;
+  }
+  .aviso-campo:empty { display: none; }
+
+  .forca-senha {
+    margin: 2px 0 0;
+    font-size: .76rem;
+    font-weight: 700;
+  }
+  .forca-senha::before {
+    content: ""; display: block; height: 4px; margin-bottom: 6px;
+    border-radius: 2px; background: var(--linha);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    transition: background-size var(--transicao);
+  }
+  .forca-senha--muito-fraca { color: #FF4D37; }
+  .forca-senha--muito-fraca::before { background-size: 22% 100%; }
+  .forca-senha--fraca { color: #E8A317; }
+  .forca-senha--fraca::before { background-size: 60% 100%; }
+  .forca-senha--forte { color: var(--acento-texto); }
+  .forca-senha--forte::before { background-size: 100% 100%; }
+
+  .regras-senha {
+    list-style: none;
+    margin: 2px 0 0; padding: 0;
+    display: grid; gap: 4px;
+    font-size: .76rem;
+    color: var(--tinta-fraca);
+  }
+  .regras-senha li::before {
+    content: "✕"; display: inline-block; width: 1.3em;
+    color: #FF4D37; font-weight: 700;
+  }
+  .regras-senha li.ok { color: var(--tinta); }
+  .regras-senha li.ok::before { content: "✓"; color: var(--acento-texto); }
+  [data-tema="claro"] .forca-senha--fraca { color: #8A5A00; }
+
+  /* --- carrinho: aviso para visitante que tentou finalizar --- */
+  .aviso-conta {
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid var(--acento);
+    border-left-width: 4px;
+    border-radius: 3px;
+    background: var(--acento-fundo);
+  }
+  .aviso-conta:focus { outline: none; }
+  .aviso-conta:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
+  .aviso-conta--novo { animation: subir 360ms cubic-bezier(.2,.8,.25,1); }
+  .aviso-conta__titulo {
+    margin: 0 0 6px;
+    font-family: var(--display);
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: -.01em;
+  }
+  .aviso-conta__texto {
+    margin: 0 0 16px;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--tinta-media);
+  }
+  .aviso-conta__botoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .aviso-conta__botoes .btn { justify-content: center; text-align: center; }
+
   /* --- login: acesso rápido de demonstração (modal) --- */
   .modal-demo {
     position: fixed; inset: 0; z-index: 110;
