@@ -191,7 +191,16 @@
    // Sobe quando os dados iniciais mudam de formato (ex.: as imagens mudaram
    // de pasta). Quem já tinha visitado o site recebe o catálogo novo.
    var VERSAO_DADOS = 2;
-   
+
+   // Abaixo disso (ou igual) o dashboard acende o alerta de "estoque baixo"
+   var ESTOQUE_BAIXO = 5;
+
+   // Estoque inicial de cada peça do seed (varia pelo id, só pro
+   // dashboard ter números diferentes desde a primeira visita)
+   function estoqueInicial(id) {
+     return (id * 13) % 37 + 2;
+   }
+
    // Cria as chaves que ainda não existem. Roda em toda página.
    function semearDados() {
      if (lerStorage("verso_versao") !== VERSAO_DADOS) {
@@ -199,13 +208,28 @@
        salvarStorage("verso_versao", VERSAO_DADOS);
      }
      if (!lerStorage("verso_produtos")) salvarStorage("verso_produtos", PRODUTOS_INICIAIS);
+     garantirEstoque();
      if (!lerStorage("verso_usuarios")) salvarStorage("verso_usuarios", USUARIOS_INICIAIS);
      if (!lerStorage("verso_pedidos")) salvarStorage("verso_pedidos", []);
      if (!lerStorage("verso_vistos")) salvarStorage("verso_vistos", []);
      garantirDrop();
    }
    
-   // Recria tudo do zero (usado pelo botão "Limpar dados" do relatório).
+   // Peça sem o campo "estoque" (seed ou cadastro antigo) ganha um valor inicial.
+   function garantirEstoque() {
+     var produtos = lerStorage("verso_produtos") || [];
+     var mudou = false;
+     var i;
+     for (i = 0; i < produtos.length; i++) {
+       if (typeof produtos[i].estoque !== "number") {
+         produtos[i].estoque = estoqueInicial(produtos[i].id);
+         mudou = true;
+       }
+     }
+     if (mudou) salvarStorage("verso_produtos", produtos);
+   }
+
+   // Recria tudo do zero (usado pelo botão "Limpar dados" do dashboard).
    function restaurarSeed() {
      var i;
      for (i = localStorage.length - 1; i >= 0; i--) {
@@ -735,7 +759,7 @@
    
      var seletores = ".secao, .drop, .manifesto, .confianca, .cabecalho-pagina," +
                      " .detalhe, .carrinho, .caixa-conta, .admin__form, .admin__tabela," +
-                     " .resumo-cards, .bloco-tabela, .zona-perigo";
+                     " .resumo-cards, .bloco-tabela, .zona-perigo, .grafico";
      var blocos = document.querySelectorAll(seletores);
      var i;
      for (i = 0; i < blocos.length; i++) blocos[i].classList.add("revelar");
@@ -1229,23 +1253,17 @@
      });
    }
    
-   // Relatório e Admin só aparecem no menu para quem é admin.
-   // Para o consumidor esses links nem existem na página.
+   // O Dashboard só aparece no menu para quem é admin.
+   // Para o consumidor esse link nem existe na página.
    function montarLinkAdmin() {
      var usuario = usuarioLogado();
      var menu = document.getElementById("menu");
      if (!usuario || usuario.tipo !== "admin" || !menu) return;
      var pagina = document.body.dataset.pagina;
-   
-     var relatorio = document.createElement("a");
-     relatorio.href = PASTA_PAGINAS + "relatorio.html";
-     relatorio.textContent = "Relatório";
-     if (pagina === "relatorio") relatorio.className = "ativo";
-     menu.appendChild(relatorio);
-   
+
      var link = document.createElement("a");
      link.href = PASTA_PAGINAS + "admin.html";
-     link.textContent = "Admin";
+     link.textContent = "Dashboard";
      link.className = "menu__admin" + (pagina === "admin" ? " ativo" : "");
      menu.appendChild(link);
    }
@@ -1259,7 +1277,7 @@
      });
    }
    
-   // Números de venda usados pelo painel admin e pelo relatório
+   // Números de venda usados pelo dashboard do admin
    function resumirVendas(pedidos) {
      var resumo = { pedidos: pedidos.length, itens: 0, total: 0, ultimo: null };
      var i, j;
@@ -2290,7 +2308,9 @@
        var produto = buscarProduto(itensCarrinho[i].idProduto);
        if (!produto) continue;
        itens.push({
+         idProduto: produto.id,
          nome: produto.nome,
+         categoria: produto.categoria,
          tamanho: itensCarrinho[i].tamanho,
          quantidade: itensCarrinho[i].quantidade,
          preco: produto.preco
@@ -2306,6 +2326,7 @@
        id: pedidos.length + 1,
        idUsuario: usuario.id,
        data: new Date().toLocaleString("pt-BR"),
+       dataISO: new Date().toISOString(),   // usada pelo gráfico de faturamento
        itens: itens,
        subtotal: subtotal,
        desconto: desconto,
@@ -2316,12 +2337,16 @@
      salvarStorage("verso_pedidos", pedidos);
    }
    
-   // cada compra alimenta o "mais vendidos"
+   // cada compra alimenta o "mais vendidos" e tira as peças do estoque
    function somarVenda(idProduto, quantidade) {
      var produtos = lerProdutos();
      var i;
      for (i = 0; i < produtos.length; i++) {
-       if (produtos[i].id === idProduto) produtos[i].vendidos += quantidade;
+       if (produtos[i].id !== idProduto) continue;
+       produtos[i].vendidos += quantidade;
+       if (typeof produtos[i].estoque === "number") {
+         produtos[i].estoque = Math.max(0, produtos[i].estoque - quantidade);
+       }
      }
      salvarStorage("verso_produtos", produtos);
    }
@@ -2441,116 +2466,452 @@
    
    function irParaDestino() {
      var voltar = parametroDaUrl("voltar");
-     window.location.href = voltar ? voltar : RAIZ + "index.html";
+     if (voltar) { window.location.href = voltar; return; }
+     var usuario = usuarioLogado();
+     // o administrador cai direto no dashboard
+     window.location.href = usuario && usuario.tipo === "admin"
+       ? PASTA_PAGINAS + "admin.html"
+       : RAIZ + "index.html";
    }
    
    
    /* #########################################################
-      pages/admin.js
+      pages/admin.js  (dashboard do administrador)
       ######################################################### */
-   
-   /* --- ADMIN --- */
-   
+
+   /* --- DASHBOARD ---
+      Página restrita: quem não é admin é mandado embora por exigirAdmin().
+      Quatro abas: Visão geral (indicadores e gráficos), Produtos
+      (cadastrar, listar, editar e excluir), Clientes e Pedidos. */
+
    // id da peça que está no formulário (null = cadastrando uma peça nova)
    var idEmEdicao = null;
-   
+   // id do cliente aberto na ficha (null = nenhum)
+   var idClienteAberto = null;
+
+   var ABAS_DASHBOARD = ["visao", "produtos", "clientes", "pedidos"];
+
    function iniciarAdmin() {
      if (!exigirAdmin()) return;
-   
-     var selectImagem = document.getElementById("pImagem");
-   
-     // select com as imagens que existem em assets/img/
+
+     // ----- abas -----
+     var botoesAba = document.querySelectorAll(".dash-aba");
      var i;
+     for (i = 0; i < botoesAba.length; i++) {
+       botoesAba[i].addEventListener("click", function () {
+         mostrarAba(this.dataset.aba);
+       });
+     }
+
+     // ----- formulário de produto -----
+     var selectImagem = document.getElementById("pImagem");
      for (i = 0; i < IMAGENS_DISPONIVEIS.length; i++) {
        var opcao = document.createElement("option");
        opcao.value = "assets/img/" + IMAGENS_DISPONIVEIS[i];
        opcao.textContent = IMAGENS_DISPONIVEIS[i];
        selectImagem.appendChild(opcao);
      }
-   
      selectImagem.addEventListener("change", atualizarPreviaAdmin);
      atualizarPreviaAdmin();
-   
-     document.getElementById("btnCancelarEdicao").addEventListener("click", function () {
-       sairDaEdicao();
+
+     document.getElementById("btnCancelarEdicao").addEventListener("click", sairDaEdicao);
+     document.getElementById("formProduto").addEventListener("submit", salvarFormularioProduto);
+
+     // ----- filtros das listas -----
+     document.getElementById("buscaProdutoAdmin").addEventListener("input", desenharTabelaAdmin);
+     document.getElementById("filtroCategoriaAdmin").addEventListener("change", desenharTabelaAdmin);
+     document.getElementById("buscaCliente").addEventListener("input", desenharClientes);
+
+     // ----- zona de perigo -----
+     document.getElementById("btnLimparDados").addEventListener("click", function () {
+       if (!confirm("Isso apaga produtos, usuários, pedidos e carrinhos. Continuar?")) return;
+       restaurarSeed();
+       fazerLogout();
+       window.location.href = RAIZ + "index.html";
      });
-   
-     document.getElementById("formProduto").addEventListener("submit", function (evento) {
-       evento.preventDefault();
-       var erro = document.getElementById("erroProduto");
-       var nome = document.getElementById("pNome").value.trim();
-       var preco = parseFloat(document.getElementById("pPreco").value);
-       var precoAntigo = parseFloat(document.getElementById("pPrecoAntigo").value);
-       var descricao = document.getElementById("pDescricao").value.trim();
-       var cor = document.getElementById("pCor").value.trim();
-       var tamanhos = separarTamanhos(document.getElementById("pTamanhos").value);
-   
-       if (nome.length < 3) { erro.textContent = "Dê um nome à peça."; return; }
-       if (isNaN(preco) || preco <= 0) { erro.textContent = "Informe um preço maior que zero."; return; }
-       if (tamanhos.length === 0) { erro.textContent = "Informe ao menos um tamanho."; return; }
-   
-       // na edição a peça mantém o id e as vendas que já tinha
-       var original = idEmEdicao !== null ? buscarProduto(idEmEdicao) : null;
-   
-       var peca = {
-         id: original ? original.id : proximoIdProduto(),
-         nome: nome,
-         categoria: document.getElementById("pCategoria").value,
-         preco: preco,
-         descricao: descricao || "Peça da loja VERSO.",
-         tamanhos: tamanhos,
-         cor: cor || "Única",
-         imagem: selectImagem.value,
-         destaque: document.getElementById("pDestaque").checked,
-         lancamento: document.getElementById("pLancamento").checked,
-         vendidos: original ? original.vendidos : 0,
-         colecao: document.getElementById("pColecao").value
-       };
-       if (!isNaN(precoAntigo) && precoAntigo > preco) peca.precoAntigo = precoAntigo;
-   
-       if (original) {
-         atualizarProduto(peca);
-         mostrarToast(nome + " atualizada");
-       } else {
-         adicionarProduto(peca);
-         mostrarToast(nome + " entrou no catálogo");
-       }
-       sairDaEdicao();
-       desenharTabelaAdmin();   // atualiza a tabela sem recarregar a página
-     });
-   
-     desenharTabelaAdmin();
-     desenharVendasAdmin();
-   
-     // cliente finalizou compra em outra aba -> vendas e tabela se atualizam
-     aoMudarDados(["verso_pedidos", "verso_produtos"], function (chave) {
-       desenharVendasAdmin();
-       desenharTabelaAdmin();
+
+     desenharDashboard();
+
+     // compra finalizada, peça ou cliente novo em outra aba -> tudo se atualiza
+     aoMudarDados(["verso_pedidos", "verso_produtos", "verso_usuarios"], function (chave) {
+       desenharDashboard();
        if (chave === "verso_pedidos") mostrarToast("Nova venda registrada");
      });
-   
-     // veio do botão "Editar produto" da página da peça (admin.html?editar=ID)
+
+     // aba inicial: veio do botão "Editar produto" da página da peça
+     // (admin.html?editar=ID) ou de um link com #produtos, #clientes...
      var paraEditar = buscarProduto(parametroDaUrl("editar"));
-     if (paraEditar) entrarEmEdicao(paraEditar);
+     if (paraEditar) {
+       mostrarAba("produtos");
+       entrarEmEdicao(paraEditar);
+     } else {
+       var hash = window.location.hash.replace("#", "");
+       mostrarAba(ABAS_DASHBOARD.indexOf(hash) !== -1 ? hash : "visao");
+     }
    }
-   
-   function desenharVendasAdmin() {
-     var vendas = resumirVendas(lerStorage("verso_pedidos") || []);
-     animarNumero(document.getElementById("admPedidos"), vendas.pedidos, false);
-     animarNumero(document.getElementById("admItens"), vendas.itens, false);
-     animarNumero(document.getElementById("admVendido"), vendas.total, true);
-     document.getElementById("admUltimo").textContent = vendas.ultimo
-       ? "#" + vendas.ultimo.id + " · " + formatarPreco(vendas.ultimo.total) + " · " + vendas.ultimo.data
-       : "—";
+
+   function mostrarAba(nome) {
+     var i;
+     for (i = 0; i < ABAS_DASHBOARD.length; i++) {
+       var aba = ABAS_DASHBOARD[i];
+       var ativa = aba === nome;
+       var botao = document.querySelector('.dash-aba[data-aba="' + aba + '"]');
+       var painel = document.getElementById("painel" + aba.charAt(0).toUpperCase() + aba.slice(1));
+       botao.classList.toggle("ativa", ativa);
+       botao.setAttribute("aria-selected", ativa ? "true" : "false");
+       painel.hidden = !ativa;
+     }
+     // guarda a aba no endereço sem pular a página
+     if (window.history && window.history.replaceState) {
+       window.history.replaceState(null, "", "#" + nome);
+     }
    }
-   
+
+   // Redesenha todas as partes do dashboard com o que está no localStorage
+   function desenharDashboard() {
+     desenharIndicadores();
+     desenharGraficos();
+     preencherFiltroCategorias();
+     desenharTabelaAdmin();
+     desenharClientes();
+     desenharFichaCliente();
+     desenharPedidos();
+   }
+
+
+   /* ----- dados usados pelo dashboard ----- */
+
+   function lerPedidos() {
+     return lerStorage("verso_pedidos") || [];
+   }
+
+   function lerClientes() {
+     var usuarios = lerUsuarios();
+     var clientes = [];
+     var i;
+     for (i = 0; i < usuarios.length; i++) {
+       if (usuarios[i].tipo !== "admin") clientes.push(usuarios[i]);
+     }
+     return clientes;
+   }
+
+   function estoqueDe(produto) {
+     return typeof produto.estoque === "number" ? produto.estoque : 0;
+   }
+
+   // Pedidos novos guardam dataISO; os antigos só têm "dd/mm/aaaa, hh:mm:ss"
+   function dataDoPedido(pedido) {
+     if (pedido.dataISO) return new Date(pedido.dataISO);
+     var partes = String(pedido.data || "").split(/[\/,\s:]+/);
+     if (partes.length < 3) return null;
+     return new Date(Number(partes[2]), Number(partes[1]) - 1, Number(partes[0]));
+   }
+
+   // Pedidos novos guardam a categoria do item; nos antigos procura pelo nome
+   function categoriaDoItem(item, produtos) {
+     if (item.categoria) return item.categoria;
+     var i;
+     for (i = 0; i < produtos.length; i++) {
+       if (produtos[i].id === item.idProduto || produtos[i].nome === item.nome) return produtos[i].categoria;
+     }
+     return "Outros";
+   }
+
+   // Soma pedidos e gasto de cada cliente: { idUsuario: {pedidos, total, ultimo} }
+   function resumirClientes(pedidos) {
+     var resumo = {};
+     var i;
+     for (i = 0; i < pedidos.length; i++) {
+       var id = pedidos[i].idUsuario;
+       if (!resumo[id]) resumo[id] = { pedidos: 0, total: 0, ultimo: null };
+       resumo[id].pedidos++;
+       resumo[id].total += pedidos[i].total;
+       resumo[id].ultimo = pedidos[i];
+     }
+     return resumo;
+   }
+
+   function resumoDoCliente(resumo, id) {
+     return resumo[id] || { pedidos: 0, total: 0, ultimo: null };
+   }
+
+
+   /* ----- visão geral: indicadores ----- */
+
+   function desenharIndicadores() {
+     var produtos = lerProdutos();
+     var vendas = resumirVendas(lerPedidos());
+     var estoqueTotal = 0;
+     var baixo = 0;
+     var i;
+     for (i = 0; i < produtos.length; i++) {
+       estoqueTotal += estoqueDe(produtos[i]);
+       if (estoqueDe(produtos[i]) <= ESTOQUE_BAIXO) baixo++;
+     }
+
+     animarNumero(document.getElementById("kpiFaturamento"), vendas.total, true);
+     animarNumero(document.getElementById("kpiPedidos"), vendas.pedidos, false);
+     animarNumero(document.getElementById("kpiTicket"), vendas.pedidos ? vendas.total / vendas.pedidos : 0, true);
+     animarNumero(document.getElementById("kpiClientes"), lerClientes().length, false);
+     animarNumero(document.getElementById("kpiProdutos"), produtos.length, false);
+     animarNumero(document.getElementById("kpiEstoque"), estoqueTotal, false);
+     animarNumero(document.getElementById("kpiEstoqueBaixo"), baixo, false);
+     animarNumero(document.getElementById("kpiVendidas"), vendas.itens, false);
+
+     document.getElementById("kpiEstoqueBaixo").classList.toggle("cartao-numero__valor--alerta", baixo > 0);
+   }
+
+
+   /* ----- visão geral: gráficos (só HTML + CSS, sem biblioteca) ----- */
+
+   function desenharGraficos() {
+     var produtos = lerProdutos();
+     var pedidos = lerPedidos();
+     var i, j;
+
+     desenharGraficoDias(pedidos);
+
+     // faturamento por categoria
+     var porCategoria = {};
+     for (i = 0; i < pedidos.length; i++) {
+       for (j = 0; j < pedidos[i].itens.length; j++) {
+         var item = pedidos[i].itens[j];
+         var cat = categoriaDoItem(item, produtos);
+         porCategoria[cat] = (porCategoria[cat] || 0) + item.preco * item.quantidade;
+       }
+     }
+     desenharBarras(document.getElementById("graficoCategorias"),
+       objetoEmLista(porCategoria, true), "Nenhuma venda registrada ainda.");
+
+     // mais vendidos (top 5)
+     var ordenados = produtos.slice().sort(function (a, b) { return b.vendidos - a.vendidos; });
+     var top = [];
+     for (i = 0; i < ordenados.length && i < 5; i++) {
+       top.push({ rotulo: ordenados[i].nome, valor: ordenados[i].vendidos, texto: ordenados[i].vendidos + " un." });
+     }
+     desenharBarras(document.getElementById("graficoTop"), top, "Nenhum produto cadastrado.");
+
+     // estoque por categoria
+     var estoqueCat = {};
+     for (i = 0; i < produtos.length; i++) {
+       estoqueCat[produtos[i].categoria] = (estoqueCat[produtos[i].categoria] || 0) + estoqueDe(produtos[i]);
+     }
+     desenharBarras(document.getElementById("graficoEstoque"),
+       objetoEmLista(estoqueCat, false), "Nenhum produto cadastrado.");
+
+     desenharEstoqueBaixo(produtos);
+
+     // melhores clientes (top 5 por valor gasto)
+     var resumo = resumirClientes(pedidos);
+     var clientes = lerClientes();
+     var lista = [];
+     for (i = 0; i < clientes.length; i++) {
+       var r = resumoDoCliente(resumo, clientes[i].id);
+       if (r.total > 0) {
+         lista.push({ rotulo: clientes[i].nome, valor: r.total,
+                      texto: formatarPreco(r.total) + " · " + r.pedidos + (r.pedidos === 1 ? " pedido" : " pedidos") });
+       }
+     }
+     lista.sort(function (a, b) { return b.valor - a.valor; });
+     desenharBarras(document.getElementById("graficoClientes"), lista.slice(0, 5),
+       "Nenhum cliente comprou ainda.");
+   }
+
+   // { "Tênis": 10, ... } -> [{rotulo, valor, texto}] em ordem decrescente
+   function objetoEmLista(objeto, ehDinheiro) {
+     var lista = [];
+     var chave;
+     for (chave in objeto) {
+       if (!objeto.hasOwnProperty(chave)) continue;
+       lista.push({ rotulo: chave, valor: objeto[chave],
+                    texto: ehDinheiro ? formatarPreco(objeto[chave]) : objeto[chave] + " un." });
+     }
+     lista.sort(function (a, b) { return b.valor - a.valor; });
+     return lista;
+   }
+
+   // Barras horizontais: a maior ocupa 100% e as outras são proporcionais
+   function desenharBarras(container, lista, textoVazio) {
+     container.textContent = "";
+     if (lista.length === 0) {
+       container.appendChild(novo("p", "grafico__vazio", textoVazio));
+       return;
+     }
+     var maior = 0;
+     var i;
+     for (i = 0; i < lista.length; i++) if (lista[i].valor > maior) maior = lista[i].valor;
+
+     for (i = 0; i < lista.length; i++) {
+       var linha = novo("div", "barra");
+       var topo = novo("div", "barra__topo");
+       topo.appendChild(novo("span", "barra__rotulo", lista[i].rotulo));
+       topo.appendChild(novo("span", "barra__valor", lista[i].texto));
+       var trilho = novo("div", "barra__trilho");
+       var preenchida = novo("div", "barra__preenchida");
+       preenchida.style.width = (maior > 0 ? lista[i].valor / maior * 100 : 0) + "%";
+       preenchida.style.animationDelay = (i * 0.07) + "s";
+       trilho.appendChild(preenchida);
+       linha.appendChild(topo);
+       linha.appendChild(trilho);
+       container.appendChild(linha);
+     }
+   }
+
+   // Colunas com o faturamento de cada um dos últimos 7 dias
+   function desenharGraficoDias(pedidos) {
+     var container = document.getElementById("graficoDias");
+     container.textContent = "";
+
+     var hoje = new Date();
+     hoje.setHours(0, 0, 0, 0);
+     var dias = [];
+     var i;
+     for (i = 6; i >= 0; i--) {
+       var dia = new Date(hoje);
+       dia.setDate(hoje.getDate() - i);
+       dias.push({ data: dia, total: 0 });
+     }
+
+     var semana = 0;
+     for (i = 0; i < pedidos.length; i++) {
+       var data = dataDoPedido(pedidos[i]);
+       if (!data || isNaN(data.getTime())) continue;
+       data.setHours(0, 0, 0, 0);
+       var j;
+       for (j = 0; j < dias.length; j++) {
+         if (dias[j].data.getTime() === data.getTime()) {
+           dias[j].total += pedidos[i].total;
+           semana += pedidos[i].total;
+         }
+       }
+     }
+     document.getElementById("totalSemana").textContent = formatarPreco(semana);
+
+     var maior = 0;
+     for (i = 0; i < dias.length; i++) if (dias[i].total > maior) maior = dias[i].total;
+
+     var nomes = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+     var descricao = [];
+     for (i = 0; i < dias.length; i++) {
+       var coluna = novo("div", "coluna" + (i === dias.length - 1 ? " coluna--hoje" : ""));
+       coluna.appendChild(novo("span", "coluna__valor", dias[i].total > 0 ? formatarPreco(dias[i].total) : ""));
+       var trilho = novo("div", "coluna__trilho");
+       var barra = novo("div", "coluna__barra");
+       // dia sem venda ganha um tracinho para o eixo não ficar vazio
+       barra.style.height = (maior > 0 ? Math.max(dias[i].total / maior * 100, 2) : 2) + "%";
+       barra.style.animationDelay = (i * 0.06) + "s";
+       trilho.appendChild(barra);
+       coluna.appendChild(trilho);
+       coluna.appendChild(novo("span", "coluna__dia",
+         i === dias.length - 1 ? "hoje" : nomes[dias[i].data.getDay()] + " " + doisDigitos(dias[i].data.getDate())));
+       container.appendChild(coluna);
+       descricao.push(doisDigitos(dias[i].data.getDate()) + "/" + doisDigitos(dias[i].data.getMonth() + 1) +
+                      ": " + formatarPreco(dias[i].total));
+     }
+     container.setAttribute("aria-label", "Faturamento por dia. " + descricao.join("; "));
+   }
+
+   function desenharEstoqueBaixo(produtos) {
+     var lista = document.getElementById("listaEstoqueBaixo");
+     lista.textContent = "";
+     var baixos = [];
+     var i;
+     for (i = 0; i < produtos.length; i++) {
+       if (estoqueDe(produtos[i]) <= ESTOQUE_BAIXO) baixos.push(produtos[i]);
+     }
+     baixos.sort(function (a, b) { return estoqueDe(a) - estoqueDe(b); });
+     document.getElementById("pillEstoqueBaixo").textContent = baixos.length;
+
+     if (baixos.length === 0) {
+       lista.appendChild(novo("li", "grafico__vazio", "Todo o estoque está em dia."));
+       return;
+     }
+     for (i = 0; i < baixos.length; i++) {
+       (function (produto) {
+         var li = novo("li", "lista-alerta__item");
+         li.appendChild(novo("span", "lista-alerta__nome", produto.nome));
+         li.appendChild(novo("span", "selo-estoque " + classeEstoque(produto),
+           estoqueDe(produto) === 0 ? "esgotado" : estoqueDe(produto) + " un."));
+         var botao = novo("button", "btn-editar", "Repor");
+         botao.type = "button";
+         botao.addEventListener("click", function () {
+           mostrarAba("produtos");
+           entrarEmEdicao(produto);
+           document.getElementById("pEstoque").focus({ preventScroll: true });
+         });
+         li.appendChild(botao);
+         lista.appendChild(li);
+       })(baixos[i]);
+     }
+   }
+
+   function classeEstoque(produto) {
+     var qtd = estoqueDe(produto);
+     if (qtd === 0) return "selo-estoque--zerado";
+     if (qtd <= ESTOQUE_BAIXO) return "selo-estoque--baixo";
+     return "";
+   }
+
+
+   /* ----- produtos: cadastrar e editar (REQUISITO 2) ----- */
+
+   function salvarFormularioProduto(evento) {
+     evento.preventDefault();
+     var erro = document.getElementById("erroProduto");
+     var nome = document.getElementById("pNome").value.trim();
+     var preco = parseFloat(document.getElementById("pPreco").value);
+     var precoAntigo = parseFloat(document.getElementById("pPrecoAntigo").value);
+     var textoEstoque = document.getElementById("pEstoque").value;
+     var estoque = Number(textoEstoque);
+     var descricao = document.getElementById("pDescricao").value.trim();
+     var cor = document.getElementById("pCor").value.trim();
+     var tamanhos = separarTamanhos(document.getElementById("pTamanhos").value);
+
+     if (nome.length < 3) { erro.textContent = "Dê um nome à peça."; return; }
+     if (isNaN(preco) || preco <= 0) { erro.textContent = "Informe um preço maior que zero."; return; }
+     if (textoEstoque === "" || isNaN(estoque) || estoque < 0 || Math.floor(estoque) !== estoque) {
+       erro.textContent = "Informe o estoque em unidades (0 ou mais)."; return;
+     }
+     if (tamanhos.length === 0) { erro.textContent = "Informe ao menos um tamanho."; return; }
+
+     // na edição a peça mantém o id e as vendas que já tinha
+     var original = idEmEdicao !== null ? buscarProduto(idEmEdicao) : null;
+
+     var peca = {
+       id: original ? original.id : proximoIdProduto(),
+       nome: nome,
+       categoria: document.getElementById("pCategoria").value,
+       preco: preco,
+       descricao: descricao || "Peça da loja VERSO.",
+       tamanhos: tamanhos,
+       cor: cor || "Única",
+       imagem: document.getElementById("pImagem").value,
+       destaque: document.getElementById("pDestaque").checked,
+       lancamento: document.getElementById("pLancamento").checked,
+       vendidos: original ? original.vendidos : 0,
+       estoque: estoque,
+       colecao: document.getElementById("pColecao").value
+     };
+     if (!isNaN(precoAntigo) && precoAntigo > preco) peca.precoAntigo = precoAntigo;
+
+     if (original) {
+       atualizarProduto(peca);
+       mostrarToast(nome + " atualizada");
+     } else {
+       adicionarProduto(peca);
+       mostrarToast(nome + " entrou no catálogo");
+     }
+     sairDaEdicao();
+     desenharDashboard();   // tabela, indicadores e gráficos sem recarregar a página
+   }
+
    function atualizarPreviaAdmin() {
      var selectImagem = document.getElementById("pImagem");
      var previa = document.getElementById("previaImagem");
      previa.src = urlImagem(selectImagem.value);
      previa.alt = "Prévia de " + selectImagem.options[selectImagem.selectedIndex].textContent;
    }
-   
+
    // Marca a opção com esse valor; se ela não existir no <select>
    // (ex.: coleção ou imagem cadastrada fora da lista), cria na hora.
    function escolherOpcao(select, valor) {
@@ -2564,16 +2925,17 @@
      select.appendChild(opcao);
      select.value = valor;
    }
-   
+
    // Joga a peça no formulário e troca os textos para o modo "editar"
    function entrarEmEdicao(produto) {
      idEmEdicao = produto.id;
-   
+
      document.getElementById("pNome").value = produto.nome;
      escolherOpcao(document.getElementById("pCategoria"), produto.categoria);
      escolherOpcao(document.getElementById("pColecao"), produto.colecao || "");
      document.getElementById("pPreco").value = produto.preco;
      document.getElementById("pPrecoAntigo").value = produto.precoAntigo || "";
+     document.getElementById("pEstoque").value = estoqueDe(produto);
      document.getElementById("pCor").value = produto.cor;
      document.getElementById("pTamanhos").value = produto.tamanhos.join(", ");
      document.getElementById("pDescricao").value = produto.descricao;
@@ -2581,27 +2943,27 @@
      document.getElementById("pDestaque").checked = !!produto.destaque;
      document.getElementById("pLancamento").checked = !!produto.lancamento;
      atualizarPreviaAdmin();
-   
+
      document.getElementById("tituloNovoProduto").textContent = "Editar peça";
      document.getElementById("btnSalvarProduto").textContent = "Salvar alterações";
      document.getElementById("btnCancelarEdicao").hidden = false;
      document.getElementById("erroProduto").textContent = "";
-   
+
      document.getElementById("secaoFormProduto").scrollIntoView({ behavior: "smooth", block: "start" });
      document.getElementById("pNome").focus({ preventScroll: true });
    }
-   
+
    // Limpa o formulário e volta para o modo "nova peça"
    function sairDaEdicao() {
      idEmEdicao = null;
      document.getElementById("formProduto").reset();
      atualizarPreviaAdmin();
      document.getElementById("tituloNovoProduto").textContent = "Nova peça";
-     document.getElementById("btnSalvarProduto").textContent = "Adicionar ao catálogo";
+     document.getElementById("btnSalvarProduto").textContent = "Cadastrar produto";
      document.getElementById("btnCancelarEdicao").hidden = true;
      document.getElementById("erroProduto").textContent = "";
    }
-   
+
    function separarTamanhos(texto) {
      var partes = texto.split(",");
      var lista = [];
@@ -2612,18 +2974,56 @@
      }
      return lista;
    }
-   
+
+
+   /* ----- produtos: listar e excluir (REQUISITO 2) ----- */
+
+   // Monta as opções do filtro com as categorias que existem no catálogo
+   function preencherFiltroCategorias() {
+     var select = document.getElementById("filtroCategoriaAdmin");
+     var atual = select.value;
+     var categorias = listaUnica("categoria");
+     select.textContent = "";
+     var todas = document.createElement("option");
+     todas.value = "";
+     todas.textContent = "Todas";
+     select.appendChild(todas);
+     var i;
+     for (i = 0; i < categorias.length; i++) {
+       var opcao = document.createElement("option");
+       opcao.value = categorias[i];
+       opcao.textContent = categorias[i];
+       select.appendChild(opcao);
+     }
+     select.value = categorias.indexOf(atual) !== -1 ? atual : "";
+   }
+
    function desenharTabelaAdmin() {
      var corpo = document.getElementById("corpoTabelaProdutos");
      var produtos = lerProdutos();
+     var termo = semAcento(document.getElementById("buscaProdutoAdmin").value.trim());
+     var categoria = document.getElementById("filtroCategoriaAdmin").value;
      corpo.textContent = "";
      document.getElementById("totalProdutosAdmin").textContent = produtos.length;
-   
+
+     var visiveis = [];
      var i;
      for (i = 0; i < produtos.length; i++) {
+       var p = produtos[i];
+       if (categoria && p.categoria !== categoria) continue;
+       if (termo && semAcento(p.nome + " " + p.cor + " " + (p.colecao || "")).indexOf(termo) === -1) continue;
+       visiveis.push(p);
+     }
+
+     if (visiveis.length === 0) {
+       corpo.appendChild(linhaVazia(7, produtos.length ? "Nenhum produto encontrado." : "Nenhum produto cadastrado."));
+       return;
+     }
+
+     for (i = 0; i < visiveis.length; i++) {
        (function (produto) {
          var linha = document.createElement("tr");
-   
+
          var tdFoto = document.createElement("td");
          var foto = document.createElement("img");
          foto.className = "mini-foto";
@@ -2631,179 +3031,52 @@
          foto.alt = produto.nome;
          foto.loading = "lazy";
          tdFoto.appendChild(foto);
-   
+
          linha.appendChild(tdFoto);
          linha.appendChild(celula(produto.nome));
          linha.appendChild(celula(produto.categoria));
          linha.appendChild(celula(formatarPreco(produto.preco)));
+
+         var tdEstoque = document.createElement("td");
+         tdEstoque.appendChild(novo("span", "selo-estoque " + classeEstoque(produto),
+           estoqueDe(produto) === 0 ? "esgotado" : estoqueDe(produto) + " un."));
+         linha.appendChild(tdEstoque);
+
          linha.appendChild(celula(String(produto.vendidos)));
-   
+
          var tdAcao = document.createElement("td");
          tdAcao.className = "tabela__acoes";
-   
-         var editar = document.createElement("button");
+
+         var editar = novo("button", "btn-editar", "Editar");
          editar.type = "button";
-         editar.className = "btn-editar";
-         editar.textContent = "Editar";
          editar.addEventListener("click", function () {
            entrarEmEdicao(produto);
          });
          tdAcao.appendChild(editar);
-   
-         var botao = document.createElement("button");
-         botao.type = "button";
-         botao.className = "btn-remover";
-         botao.textContent = "Remover";
-         botao.addEventListener("click", function () {
-           if (!confirm("Remover \"" + produto.nome + "\" do catálogo?")) return;
+
+         var excluir = novo("button", "btn-remover", "Excluir");
+         excluir.type = "button";
+         excluir.addEventListener("click", function () {
+           if (!confirm("Excluir \"" + produto.nome + "\" do catálogo?")) return;
            removerProduto(produto.id);
            if (idEmEdicao === produto.id) sairDaEdicao();
-           linha.remove();                 // tira a linha da árvore DOM
-           desenharTabelaAdmin();
-           mostrarToast("Peça removida");
+           desenharDashboard();
+           mostrarToast("Produto excluído");
          });
-         tdAcao.appendChild(botao);
+         tdAcao.appendChild(excluir);
          linha.appendChild(tdAcao);
-   
+
          corpo.appendChild(linha);
-       })(produtos[i]);
+       })(visiveis[i]);
      }
    }
-   
+
    function celula(texto) {
      var td = document.createElement("td");
      td.textContent = texto;
      return td;
    }
-   
-   
-   /* #########################################################
-      pages/relatorio.js
-      ######################################################### */
-   
-   /* --- RELATÓRIO --- */
-   // Página restrita: consumidor comum é mandado de volta para o início
-   function iniciarRelatorio() {
-     if (!exigirAdmin()) return;
-   
-     desenharRelatorio();
-   
-     // compra finalizada (ou peça/usuário novo) em outra aba -> relatório atualiza
-     aoMudarDados(["verso_pedidos", "verso_produtos", "verso_usuarios"], function (chave) {
-       desenharRelatorio();
-       if (chave === "verso_pedidos") mostrarToast("Nova venda registrada");
-     });
-   
-     document.getElementById("btnLimparDados").addEventListener("click", function () {
-       if (!confirm("Isso apaga produtos, usuários, pedidos e carrinhos. Continuar?")) return;
-       restaurarSeed();
-       fazerLogout();
-       window.location.href = RAIZ + "index.html";
-     });
-   }
-   
-   function desenharRelatorio() {
-     var produtos = lerProdutos();
-     var usuarios = lerUsuarios();
-     var pedidos = lerStorage("verso_pedidos") || [];
-     var vendas = resumirVendas(pedidos);
-   
-     animarNumero(document.getElementById("totProdutos"), produtos.length, false);
-     animarNumero(document.getElementById("totUsuarios"), usuarios.length, false);
-     animarNumero(document.getElementById("totPedidos"), vendas.pedidos, false);
-     animarNumero(document.getElementById("totVendido"), vendas.total, true);
-     document.getElementById("totCampeao").textContent = produtoMaisVendido(produtos);
-   
-     desenharPedidos(pedidos, usuarios);
-     desenharProdutosRelatorio(produtos);
-     desenharUsuarios(usuarios);
-   }
-   
-   function produtoMaisVendido(produtos) {
-     if (produtos.length === 0) return "—";
-     var campeao = produtos[0];
-     var i;
-     for (i = 1; i < produtos.length; i++) {
-       if (produtos[i].vendidos > campeao.vendidos) campeao = produtos[i];
-     }
-     return campeao.nome + " (" + campeao.vendidos + ")";
-   }
-   
-   function desenharPedidos(pedidos, usuarios) {
-     var corpo = document.getElementById("corpoPedidos");
-     corpo.textContent = "";
-   
-     if (pedidos.length === 0) {
-       corpo.appendChild(linhaVazia(6, "Nenhum pedido registrado ainda."));
-       return;
-     }
-   
-     var i, j;
-     for (i = 0; i < pedidos.length; i++) {
-       var pedido = pedidos[i];
-       var linha = document.createElement("tr");
-       linha.appendChild(celula("#" + pedido.id));
-       linha.appendChild(celula(pedido.data));
-       linha.appendChild(celula(nomeDoCliente(usuarios, pedido.idUsuario)));
-   
-       var tdItens = document.createElement("td");
-       var lista = document.createElement("ul");
-       lista.className = "lista-itens";
-       for (j = 0; j < pedido.itens.length; j++) {
-         var item = pedido.itens[j];
-         var li = document.createElement("li");
-         li.textContent = item.quantidade + "x " + item.nome + " (" + item.tamanho + ") — " + formatarPreco(item.preco);
-         lista.appendChild(li);
-       }
-       tdItens.appendChild(lista);
-       linha.appendChild(tdItens);
-   
-       linha.appendChild(celula(pedido.cupom || "—"));
-       linha.appendChild(celula(formatarPreco(pedido.total)));
-       corpo.appendChild(linha);
-     }
-   }
-   
-   function nomeDoCliente(usuarios, id) {
-     var i;
-     for (i = 0; i < usuarios.length; i++) {
-       if (usuarios[i].id === id) return usuarios[i].nome;
-     }
-     return "—";
-   }
-   
-   function desenharProdutosRelatorio(produtos) {
-     var corpo = document.getElementById("corpoProdutosRel");
-     corpo.textContent = "";
-     var i;
-     for (i = 0; i < produtos.length; i++) {
-       var p = produtos[i];
-       var linha = document.createElement("tr");
-       linha.appendChild(celula(String(p.id)));
-       linha.appendChild(celula(p.nome));
-       linha.appendChild(celula(p.categoria));
-       linha.appendChild(celula(p.colecao || "—"));
-       linha.appendChild(celula(formatarPreco(p.preco)));
-       linha.appendChild(celula(String(p.vendidos)));
-       corpo.appendChild(linha);
-     }
-   }
-   
-   function desenharUsuarios(usuarios) {
-     var corpo = document.getElementById("corpoUsuarios");
-     corpo.textContent = "";
-     var i;
-     for (i = 0; i < usuarios.length; i++) {
-       var u = usuarios[i];
-       var linha = document.createElement("tr");
-       linha.appendChild(celula(String(u.id)));
-       linha.appendChild(celula(u.nome));
-       linha.appendChild(celula(u.email));
-       linha.appendChild(celula(u.tipo));
-       corpo.appendChild(linha);
-     }
-   }
-   
+
    function linhaVazia(colunas, texto) {
      var linha = document.createElement("tr");
      var td = document.createElement("td");
@@ -2813,8 +3086,195 @@
      linha.appendChild(td);
      return linha;
    }
-   
-   
+
+
+   /* ----- clientes ----- */
+
+   function desenharClientes() {
+     var corpo = document.getElementById("corpoClientes");
+     var clientes = lerClientes();
+     var resumo = resumirClientes(lerPedidos());
+     var termo = semAcento(document.getElementById("buscaCliente").value.trim());
+     corpo.textContent = "";
+     document.getElementById("totalClientes").textContent = clientes.length;
+
+     var visiveis = [];
+     var i;
+     for (i = 0; i < clientes.length; i++) {
+       if (termo && semAcento(clientes[i].nome + " " + clientes[i].email).indexOf(termo) === -1) continue;
+       visiveis.push(clientes[i]);
+     }
+
+     if (visiveis.length === 0) {
+       corpo.appendChild(linhaVazia(7, clientes.length ? "Nenhum cliente encontrado." : "Nenhum cliente cadastrado ainda."));
+       return;
+     }
+
+     for (i = 0; i < visiveis.length; i++) {
+       (function (cliente) {
+         var r = resumoDoCliente(resumo, cliente.id);
+         var linha = document.createElement("tr");
+         if (cliente.id === idClienteAberto) linha.className = "tabela__linha--ativa";
+         linha.appendChild(celula(String(cliente.id)));
+         linha.appendChild(celula(cliente.nome));
+         linha.appendChild(celula(cliente.email));
+         linha.appendChild(celula(String(r.pedidos)));
+         linha.appendChild(celula(formatarPreco(r.total)));
+         linha.appendChild(celula(r.ultimo ? r.ultimo.data : "—"));
+
+         var tdAcao = document.createElement("td");
+         var ver = novo("button", "btn-editar", "Ver");
+         ver.type = "button";
+         ver.addEventListener("click", function () {
+           idClienteAberto = cliente.id;
+           desenharClientes();
+           desenharFichaCliente();
+           document.getElementById("fichaCliente").scrollIntoView({ behavior: "smooth", block: "nearest" });
+         });
+         tdAcao.appendChild(ver);
+         linha.appendChild(tdAcao);
+         corpo.appendChild(linha);
+       })(visiveis[i]);
+     }
+   }
+
+   // Ficha com os dados e o histórico de compras do cliente escolhido
+   function desenharFichaCliente() {
+     var ficha = document.getElementById("fichaCliente");
+     var cliente = null;
+     var clientes = lerClientes();
+     var i, j;
+     for (i = 0; i < clientes.length; i++) {
+       if (clientes[i].id === idClienteAberto) cliente = clientes[i];
+     }
+
+     ficha.textContent = "";
+     if (!cliente) {
+       var vazio = novo("p", "ficha-cliente__vazio", "Clique em ");
+       vazio.appendChild(novo("strong", "", "Ver"));
+       vazio.appendChild(document.createTextNode(" para abrir a ficha de um cliente."));
+       ficha.appendChild(vazio);
+       return;
+     }
+
+     var pedidos = lerPedidos();
+     var meus = [];
+     for (i = 0; i < pedidos.length; i++) {
+       if (pedidos[i].idUsuario === cliente.id) meus.push(pedidos[i]);
+     }
+     var r = resumoDoCliente(resumirClientes(pedidos), cliente.id);
+     var carrinho = lerStorage("verso_carrinho_" + cliente.id) || [];
+     var favoritos = lerStorage("verso_favoritos_" + cliente.id) || [];
+     var noCarrinho = 0;
+     for (i = 0; i < carrinho.length; i++) noCarrinho += carrinho[i].quantidade;
+
+     var topo = novo("div", "ficha-cliente__topo");
+     topo.appendChild(novo("span", "ficha-cliente__avatar", cliente.nome.charAt(0).toUpperCase()));
+     var nomes = novo("div");
+     nomes.appendChild(novo("h3", "ficha-cliente__nome", cliente.nome));
+     nomes.appendChild(novo("p", "ficha-cliente__email", cliente.email));
+     topo.appendChild(nomes);
+     var fechar = novo("button", "btn-icone ficha-cliente__fechar", "×");
+     fechar.type = "button";
+     fechar.setAttribute("aria-label", "Fechar ficha do cliente");
+     fechar.addEventListener("click", function () {
+       idClienteAberto = null;
+       desenharClientes();
+       desenharFichaCliente();
+     });
+     topo.appendChild(fechar);
+     ficha.appendChild(topo);
+
+     var dados = novo("dl", "ficha-cliente__dados");
+     var pares = [
+       ["ID do cliente", "#" + cliente.id],
+       ["Pedidos", String(r.pedidos)],
+       ["Total gasto", formatarPreco(r.total)],
+       ["Ticket médio", formatarPreco(r.pedidos ? r.total / r.pedidos : 0)],
+       ["Peças no carrinho", String(noCarrinho)],
+       ["Favoritos", String(favoritos.length)]
+     ];
+     for (i = 0; i < pares.length; i++) {
+       var bloco = novo("div");
+       bloco.appendChild(novo("dt", "", pares[i][0]));
+       bloco.appendChild(novo("dd", "", pares[i][1]));
+       dados.appendChild(bloco);
+     }
+     ficha.appendChild(dados);
+
+     ficha.appendChild(novo("h4", "ficha-cliente__subtitulo", "Histórico de compras"));
+     if (meus.length === 0) {
+       ficha.appendChild(novo("p", "grafico__vazio", "Esse cliente ainda não fez pedidos."));
+       return;
+     }
+     var lista = novo("ul", "ficha-cliente__pedidos");
+     for (i = meus.length - 1; i >= 0; i--) {
+       var li = novo("li");
+       var cab = novo("div", "ficha-cliente__pedido");
+       cab.appendChild(novo("strong", "", "#" + meus[i].id));
+       cab.appendChild(novo("span", "", meus[i].data));
+       cab.appendChild(novo("strong", "", formatarPreco(meus[i].total)));
+       li.appendChild(cab);
+       var itens = novo("ul", "lista-itens");
+       for (j = 0; j < meus[i].itens.length; j++) {
+         var item = meus[i].itens[j];
+         itens.appendChild(novo("li", "", item.quantidade + "x " + item.nome + " (" + item.tamanho + ")"));
+       }
+       li.appendChild(itens);
+       lista.appendChild(li);
+     }
+     ficha.appendChild(lista);
+   }
+
+
+   /* ----- pedidos ----- */
+
+   function desenharPedidos() {
+     var corpo = document.getElementById("corpoPedidos");
+     var pedidos = lerPedidos();
+     var usuarios = lerUsuarios();
+     corpo.textContent = "";
+     document.getElementById("totalPedidosTabela").textContent = pedidos.length;
+
+     if (pedidos.length === 0) {
+       corpo.appendChild(linhaVazia(6, "Nenhum pedido registrado ainda."));
+       return;
+     }
+
+     var i, j;
+     // mais recente primeiro
+     for (i = pedidos.length - 1; i >= 0; i--) {
+       var pedido = pedidos[i];
+       var linha = document.createElement("tr");
+       linha.appendChild(celula("#" + pedido.id));
+       linha.appendChild(celula(pedido.data));
+       linha.appendChild(celula(nomeDoCliente(usuarios, pedido.idUsuario)));
+
+       var tdItens = document.createElement("td");
+       var lista = novo("ul", "lista-itens");
+       for (j = 0; j < pedido.itens.length; j++) {
+         var item = pedido.itens[j];
+         lista.appendChild(novo("li", "",
+           item.quantidade + "x " + item.nome + " (" + item.tamanho + ") — " + formatarPreco(item.preco)));
+       }
+       tdItens.appendChild(lista);
+       linha.appendChild(tdItens);
+
+       linha.appendChild(celula(pedido.cupom || "—"));
+       linha.appendChild(celula(formatarPreco(pedido.total)));
+       corpo.appendChild(linha);
+     }
+   }
+
+   function nomeDoCliente(usuarios, id) {
+     var i;
+     for (i = 0; i < usuarios.length; i++) {
+       if (usuarios[i].id === id) return usuarios[i].nome;
+     }
+     return "—";
+   }
+
+
    /* #########################################################
       main.js
       ######################################################### */
@@ -2838,7 +3298,6 @@
      if (pagina === "favoritos") iniciarFavoritos();
      if (pagina === "login") iniciarLogin();
      if (pagina === "admin") iniciarAdmin();
-     if (pagina === "relatorio") iniciarRelatorio();
    
      iniciarAnimacoes(); // por último: os blocos já existem na tela
    });

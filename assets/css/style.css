@@ -2092,7 +2092,7 @@
     margin-bottom: 18px;
   }
   
-  /* --- relatório --- */
+  /* --- cartões de números (dashboard) --- */
   .resumo-cards {
     display: grid;
     gap: 1px;
@@ -2160,6 +2160,365 @@
     font-size: .85rem;
     color: var(--tinta-fraca);
     max-width: 48ch;
+  }
+
+  /* --- dashboard do administrador --- */
+  .dash-abas {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--linha);
+    margin-bottom: 36px;
+    scrollbar-width: none;
+  }
+
+  .dash-aba {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    color: var(--tinta-fraca);
+    padding: 14px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: .62rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    transition: color var(--rapida), border-color var(--rapida);
+  }
+
+  .dash-aba:hover { color: var(--tinta); }
+
+  .dash-aba.ativa {
+    color: var(--acento-texto);
+    border-bottom-color: var(--acento);
+  }
+
+  .dash-aba:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: -2px;
+  }
+
+  .dash-painel { animation: subir 420ms both; }
+
+  .resumo-cards.resumo-cards--dash { grid-template-columns: repeat(2, 1fr); }
+
+  .cartao-numero__valor--alerta { color: #FF4D37; }
+
+  .dash-graficos {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  .grafico {
+    min-width: 0;
+    border: 1px solid var(--linha);
+    border-radius: 3px;
+    background: var(--fundo-2);
+    padding: 24px;
+  }
+
+  .grafico__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .grafico__topo h2 {
+    font-size: 1.15rem;
+    margin: 0;
+  }
+
+  .grafico__total {
+    font-family: var(--display);
+    font-size: 1.3rem;
+    color: var(--acento-texto);
+    white-space: nowrap;
+  }
+
+  .grafico__vazio {
+    margin: 0;
+    padding: 28px 0;
+    text-align: center;
+    color: var(--tinta-fraca);
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    list-style: none;
+  }
+
+  /* barras horizontais */
+  .barras { display: flex; flex-direction: column; gap: 16px; }
+
+  .barra__topo {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: .82rem;
+    margin-bottom: 7px;
+  }
+
+  .barra__rotulo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .barra__valor {
+    font-family: var(--mono);
+    font-size: .66rem;
+    color: var(--tinta-media);
+    white-space: nowrap;
+  }
+
+  .barra__trilho {
+    height: 10px;
+    background: var(--fundo-3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .barra__preenchida {
+    height: 100%;
+    background: var(--acento);
+    border-radius: 99px;
+    transform-origin: left;
+    animation: crescerBarra 700ms cubic-bezier(.2, .8, .25, 1) both;
+  }
+
+  /* colunas (faturamento por dia) */
+  .colunas {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 220px;
+  }
+
+  .coluna {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .coluna__valor {
+    font-family: var(--mono);
+    font-size: .52rem;
+    color: var(--tinta-media);
+    white-space: nowrap;
+    min-height: 1em;
+  }
+
+  .coluna__trilho {
+    flex: 1;
+    width: 100%;
+    max-width: 56px;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .coluna__barra {
+    width: 100%;
+    background: var(--linha-forte);
+    border-radius: 3px 3px 0 0;
+    transform-origin: bottom;
+    animation: crescerColuna 700ms cubic-bezier(.2, .8, .25, 1) both;
+  }
+
+  .coluna--hoje .coluna__barra { background: var(--acento); }
+
+  .coluna__dia {
+    font-family: var(--mono);
+    font-size: .54rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--tinta-fraca);
+    white-space: nowrap;
+  }
+
+  .coluna--hoje .coluna__dia { color: var(--acento-texto); }
+
+  @keyframes crescerBarra { from { transform: scaleX(0); } }
+  @keyframes crescerColuna { from { transform: scaleY(0); } }
+
+  /* lista de estoque baixo */
+  .lista-alerta { list-style: none; margin: 0; padding: 0; }
+
+  .lista-alerta__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--linha);
+    font-size: .84rem;
+  }
+
+  .lista-alerta__item:last-child { border-bottom: 0; }
+
+  .lista-alerta__nome {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* selo de estoque na tabela e na lista */
+  .selo-estoque {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    padding: 4px 9px;
+    border-radius: 99px;
+    border: 1px solid var(--linha-forte);
+    white-space: nowrap;
+  }
+
+  .selo-estoque--baixo { border-color: #F5A524; color: #F5A524; }
+  .selo-estoque--zerado { border-color: #FF4D37; background: #FF4D37; color: #fff; }
+  [data-tema="claro"] .selo-estoque--baixo { color: #8A5A00; border-color: #B97800; }
+
+  /* filtros acima das tabelas */
+  .dash-filtros {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr;
+    margin-bottom: 18px;
+  }
+
+  .dash-filtros .campo input,
+  .dash-filtros .campo select { padding-top: 11px; padding-bottom: 11px; }
+
+  .tabela__linha--ativa { background: var(--acento-fundo); }
+  
+  #corpoTabelaProdutos td:nth-child(4) { white-space: nowrap; }
+
+  /* clientes: tabela + ficha */
+  .dash-clientes {
+    display: grid;
+    gap: 28px;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .dash-clientes > * { min-width: 0; }
+
+  .ficha-cliente {
+    border: 1px solid var(--linha);
+    border-radius: 3px;
+    background: var(--fundo-2);
+    padding: 24px;
+  }
+
+  .ficha-cliente__vazio {
+    margin: 0;
+    color: var(--tinta-fraca);
+    font-size: .85rem;
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  .ficha-cliente__topo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .ficha-cliente__topo > div { flex: 1; min-width: 0; }
+
+  .ficha-cliente__avatar {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--acento);
+    color: var(--sobre-acento);
+    font-family: var(--display);
+    font-size: 1.3rem;
+  }
+
+  .ficha-cliente__nome { font-size: 1.2rem; margin: 0 0 4px; }
+
+  .ficha-cliente__email {
+    margin: 0;
+    font-size: .8rem;
+    color: var(--tinta-fraca);
+    overflow-wrap: anywhere;
+  }
+
+  .ficha-cliente__fechar { font-size: 1.4rem; line-height: 1; }
+
+  .ficha-cliente__dados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--linha);
+    border: 1px solid var(--linha);
+    margin: 0 0 22px;
+  }
+
+  .ficha-cliente__dados > div { background: var(--fundo); padding: 12px 14px; }
+
+  .ficha-cliente__dados dt {
+    font-family: var(--mono);
+    font-size: .5rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--tinta-fraca);
+    margin-bottom: 4px;
+  }
+
+  .ficha-cliente__dados dd { margin: 0; font-weight: 600; }
+
+  .ficha-cliente__subtitulo {
+    font-family: var(--mono);
+    font-size: .6rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--tinta-fraca);
+    margin: 0 0 12px;
+  }
+
+  .ficha-cliente__pedidos { list-style: none; margin: 0; padding: 0; }
+
+  .ficha-cliente__pedidos > li { padding: 12px 0; border-top: 1px solid var(--linha); }
+
+  .ficha-cliente__pedido {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: .82rem;
+    margin-bottom: 6px;
+  }
+
+  .ficha-cliente__pedido span { color: var(--tinta-fraca); font-size: .76rem; }
+
+  @media (min-width: 760px) {
+    .resumo-cards.resumo-cards--dash { grid-template-columns: repeat(4, 1fr); }
+    .dash-graficos { grid-template-columns: 1fr 1fr; }
+    .grafico--largo { grid-column: span 2; }
+    .dash-filtros { grid-template-columns: 2fr 1fr; }
+    .dash-filtros--um { grid-template-columns: 1fr; }
+  }
+
+  @media (min-width: 1100px) {
+    .dash-clientes { grid-template-columns: 1.5fr 1fr; }
+    .ficha-cliente { position: sticky; top: 110px; }
   }
   
   /* #########################################################
