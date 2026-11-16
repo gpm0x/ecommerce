@@ -178,6 +178,16 @@
      { id: 1, nome: "Administração VERSO", email: "admin@verso.com", senha: "admin123", tipo: "admin" }
    ];
    
+   // ACESSO RÁPIDO (apresentação acadêmica): um lugar só para as contas de demonstração.
+   // O modal da tela de login lê daqui e apenas PREENCHE os campos: quem entra
+   // de verdade continua sendo o botão "Entrar", pelo fazerLogin() de sempre.
+   var CONTAS_DEMO = [
+     { perfil: "admin", rotulo: "Administrador", descricao: "Dashboard, estoque, pedidos e cadastro de peças.",
+       nome: "Administração VERSO", email: "admin@verso.com", senha: "admin123", tipo: "admin" },
+     { perfil: "cliente", rotulo: "Cliente", descricao: "Catálogo, favoritos, carrinho e finalização de compra.",
+       nome: "Cliente Demonstração", email: "cliente@verso.com", senha: "cliente123", tipo: "cliente" }
+   ];
+
    // Perfis fictícios que o botão "Preencher com dados de exemplo" joga no cadastro.
    // Não são salvos de antemão: só viram conta quando alguém clica em "Criar conta".
    var CONSUMIDORES_EXEMPLO = [
@@ -2398,6 +2408,8 @@
    
      abaEntrar.addEventListener("click", function () { trocarAba(false); });
      abaCriar.addEventListener("click", function () { trocarAba(true); });
+
+     iniciarAcessoDemo(trocarAba);
    
      // atalho pra apresentação: enche o cadastro com um consumidor pronto
      document.getElementById("btnDadosExemplo").addEventListener("click", function () {
@@ -2457,6 +2469,158 @@
      });
    }
    
+   /* --- ACESSO RÁPIDO DE DEMONSTRAÇÃO (só na tela de login) --- */
+
+   // Garante que cada conta de CONTAS_DEMO exista na "base" (verso_usuarios).
+   // Não mexe em quem já existe: só acrescenta a que estiver faltando.
+   function garantirContasDemo() {
+     var usuarios = lerUsuarios();
+     var maiorId = 0;
+     var mudou = false;
+     var i;
+     for (i = 0; i < usuarios.length; i++) {
+       if (usuarios[i].id > maiorId) maiorId = usuarios[i].id;
+     }
+     for (i = 0; i < CONTAS_DEMO.length; i++) {
+       var conta = CONTAS_DEMO[i];
+       if (buscarUsuarioPorEmail(conta.email)) continue;
+       maiorId++;
+       usuarios.push({ id: maiorId, nome: conta.nome, email: conta.email, senha: conta.senha, tipo: conta.tipo });
+       mudou = true;
+     }
+     if (mudou) salvarStorage("verso_usuarios", usuarios);
+   }
+
+   // ícones fixos (traço, no mesmo estilo dos ícones da navbar)
+   var ICONES_DEMO = {
+     admin: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4 5.5v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10v-6Z"/><path d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>',
+     cliente: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l1 12.5h-15Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
+   };
+
+   function montarCardsDemo(lista) {
+     if (!lista) return;
+     lista.textContent = "";
+     CONTAS_DEMO.forEach(function (conta, indice) {
+       var card = document.createElement("button");
+       card.type = "button";
+       card.className = "perfil-demo perfil-demo--" + conta.perfil;
+       card.setAttribute("data-perfil", conta.perfil);
+       card.style.animationDelay = (120 + indice * 80) + "ms";
+
+       var icone = document.createElement("span");
+       icone.className = "perfil-demo__icone";
+       icone.innerHTML = ICONES_DEMO[conta.perfil] || ICONES_DEMO.cliente;
+
+       var texto = document.createElement("span");
+       texto.className = "perfil-demo__texto";
+       var titulo = document.createElement("strong");
+       titulo.textContent = conta.rotulo;
+       var descricao = document.createElement("span");
+       descricao.className = "perfil-demo__descricao";
+       descricao.textContent = conta.descricao;
+       var email = document.createElement("span");
+       email.className = "perfil-demo__email";
+       email.textContent = conta.email;
+       texto.appendChild(titulo);
+       texto.appendChild(descricao);
+       texto.appendChild(email);
+
+       var seta = document.createElement("span");
+       seta.className = "perfil-demo__seta";
+       seta.setAttribute("aria-hidden", "true");
+       seta.textContent = "→";
+
+       card.appendChild(icone);
+       card.appendChild(texto);
+       card.appendChild(seta);
+       lista.appendChild(card);
+     });
+   }
+
+   function iniciarAcessoDemo(trocarAba) {
+     var modal = document.getElementById("modalDemo");
+     var btnAbrir = document.getElementById("btnAcessoDemo");
+     if (!modal || !btnAbrir) return;
+
+     garantirContasDemo();
+     montarCardsDemo(document.getElementById("listaPerfisDemo"));
+
+     var campoEmail = document.getElementById("loginEmail");
+     var campoSenha = document.getElementById("loginSenha");
+     var btnEntrar = document.querySelector("#painelEntrar button[type=submit]");
+     var focoAnterior = null;
+
+     function focaveis() {
+       return modal.querySelectorAll("button:not([disabled])");
+     }
+
+     function abrir() {
+       focoAnterior = document.activeElement;
+       modal.hidden = false;
+       document.body.classList.add("sem-rolagem");
+       // um quadro depois, para a transição de entrada acontecer
+       requestAnimationFrame(function () {
+         modal.classList.add("aberto");
+         var primeiro = modal.querySelector(".perfil-demo");
+         if (primeiro) primeiro.focus();
+       });
+     }
+
+     function fechar(focarEm) {
+       modal.classList.remove("aberto");
+       document.body.classList.remove("sem-rolagem");
+       setTimeout(function () { modal.hidden = true; }, 260);
+       var alvo = focarEm || focoAnterior;
+       if (alvo && alvo.focus) alvo.focus();
+     }
+
+     function escolher(perfil) {
+       var conta = null;
+       var i;
+       for (i = 0; i < CONTAS_DEMO.length; i++) {
+         if (CONTAS_DEMO[i].perfil === perfil) conta = CONTAS_DEMO[i];
+       }
+       if (!conta) return;
+
+       trocarAba(false);
+       campoEmail.value = conta.email;
+       campoSenha.value = conta.senha;
+       document.getElementById("erroLogin").textContent = "";
+
+       // brilho rápido nos campos para mostrar o que mudou
+       [campoEmail, campoSenha].forEach(function (campo) {
+         campo.classList.remove("campo--preenchido");
+         void campo.offsetWidth;
+         campo.classList.add("campo--preenchido");
+       });
+
+       fechar(btnEntrar);
+       mostrarToast("Perfil " + conta.rotulo + " preenchido. Confira e clique em Entrar.");
+     }
+
+     modal.addEventListener("click", function (evento) {
+       var card = evento.target.closest(".perfil-demo");
+       if (card) { escolher(card.getAttribute("data-perfil")); return; }
+       if (evento.target.closest("[data-fechar-demo]")) fechar();
+     });
+
+     modal.addEventListener("keydown", function (evento) {
+       if (evento.key === "Escape") { fechar(); return; }
+       if (evento.key !== "Tab") return;
+       // mantém o foco do teclado dentro do modal
+       var lista = focaveis();
+       var primeiro = lista[0];
+       var ultimo = lista[lista.length - 1];
+       if (evento.shiftKey && document.activeElement === primeiro) { evento.preventDefault(); ultimo.focus(); }
+       else if (!evento.shiftKey && document.activeElement === ultimo) { evento.preventDefault(); primeiro.focus(); }
+     });
+
+     btnAbrir.addEventListener("click", abrir);
+
+     // abre sozinho ao chegar na tela de login
+     abrir();
+   }
+
    // validação simples de e-mail: tem texto, @, texto, ponto e texto
    function emailValido(email) {
      var arroba = email.indexOf("@");

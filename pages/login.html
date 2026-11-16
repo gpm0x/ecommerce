@@ -92,6 +92,7 @@
       </div>
       <p class="erro" id="erroLogin" role="alert"></p>
       <button class="btn btn--acento btn--bloco" type="submit">Entrar</button>
+      <button class="btn btn--claro btn--bloco" type="button" id="btnAcessoDemo">Acesso rápido de demonstração</button>
       <p class="dica">Conta de teste do admin: <strong>admin@verso.com</strong> / <strong>admin123</strong></p>
     </form>
 
@@ -158,6 +159,22 @@
     <p>&copy; <span id="ano">2026</span> VERSO — trabalho acadêmico. Dados guardados no seu navegador.</p>
   </div>
 </footer>
+
+<!-- ACESSO RÁPIDO: modal de demonstração (só preenche os campos; quem entra é o botão "Entrar") -->
+<div class="modal-demo" id="modalDemo" hidden>
+  <div class="modal-demo__fundo" data-fechar-demo></div>
+  <div class="modal-demo__caixa" role="dialog" aria-modal="true" aria-labelledby="tituloDemo" aria-describedby="textoDemo">
+    <button class="modal-demo__fechar" type="button" data-fechar-demo aria-label="Fechar e entrar manualmente">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <p class="rotulo">Modo apresentação</p>
+    <h2 id="tituloDemo">Como deseja acessar o sistema?</h2>
+    <p class="modal-demo__texto" id="textoDemo">Escolha um perfil para preencher e-mail e senha. Depois é só conferir e clicar em <strong>Entrar</strong>.</p>
+    <!-- cards montados pelo JS a partir de CONTAS_DEMO -->
+    <div class="modal-demo__perfis" id="listaPerfisDemo"></div>
+    <button class="modal-demo__manual" type="button" data-fechar-demo>Prefiro digitar meus dados</button>
+  </div>
+</div>
 
 <div class="toast-area" id="toastArea" aria-live="polite"></div>
 
