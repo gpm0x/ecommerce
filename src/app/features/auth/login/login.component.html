@@ -1,0 +1,107 @@
+<main id="conteudo" class="pagina pagina--estreita">
+
+  <div class="cabecalho-pagina" appRevelar>
+    <p class="rotulo">Conta VERSO</p>
+    <h1>{{ cadastro() ? 'Criar conta' : 'Entrar' }}</h1>
+  </div>
+
+  <div class="caixa-conta" appRevelar>
+    <div class="abas" role="tablist" aria-label="Entrar ou criar conta">
+      <button class="aba" type="button" id="abaEntrar" role="tab" [class.ativa]="!cadastro()"
+              [attr.aria-selected]="!cadastro()" aria-controls="painelEntrar" (click)="cadastro.set(false)">Entrar</button>
+      <button class="aba" type="button" id="abaCriar" role="tab" [class.ativa]="cadastro()"
+              [attr.aria-selected]="cadastro()" aria-controls="painelCriar" (click)="cadastro.set(true)">Criar conta</button>
+    </div>
+
+    <!-- REQUISITO 1: formulário de login -->
+    <form class="formulario" id="painelEntrar" role="tabpanel" aria-labelledby="abaEntrar" novalidate
+          [hidden]="cadastro()" (submit)="entrar($event)">
+      <div class="campo">
+        <label for="loginEmail">E-mail</label>
+        <input type="email" id="loginEmail" name="loginEmail" autocomplete="email" placeholder="voce@email.com"
+               [(ngModel)]="loginEmail" [appReanimar]="brilho()" reanimarClasse="campo--preenchido">
+      </div>
+      <div class="campo">
+        <label for="loginSenha">Senha</label>
+        <input type="password" id="loginSenha" name="loginSenha" autocomplete="current-password" placeholder="Mínimo 6 caracteres"
+               [(ngModel)]="loginSenha" [appReanimar]="brilho()" reanimarClasse="campo--preenchido">
+      </div>
+      <p class="erro" role="alert">{{ erroLogin() }}</p>
+      <button class="btn btn--acento btn--bloco" type="submit" #btnEntrar>Entrar</button>
+      <button class="btn btn--claro btn--bloco" type="button" (click)="abrirModal()">Acesso rápido de demonstração</button>
+      <p class="dica">Conta de teste do admin: <strong>admin&#64;verso.com</strong> / <strong>admin123</strong></p>
+    </form>
+
+    <!-- REQUISITO 1: formulário de cadastro -->
+    <form class="formulario" id="painelCriar" role="tabpanel" aria-labelledby="abaCriar" novalidate
+          [hidden]="!cadastro()" (submit)="criarConta($event)">
+      <button class="btn btn--claro btn--bloco" type="button" (click)="preencherExemplo()">Preencher com dados de exemplo</button>
+      <div class="campo">
+        <label for="cadNome">Nome</label>
+        <input type="text" id="cadNome" name="cadNome" autocomplete="name" placeholder="Como quer ser chamado" [(ngModel)]="cadNome">
+      </div>
+      <div class="campo">
+        <label for="cadEmail">E-mail</label>
+        <input type="email" id="cadEmail" name="cadEmail" #campoCadEmail autocomplete="email" placeholder="voce@email.com"
+               aria-describedby="avisoCadEmail" [class.campo--invalido]="avisoEmail() !== ''"
+               [(ngModel)]="cadEmail" (ngModelChange)="emailDigitado()" (blur)="conferirEmail()">
+        <p class="aviso-campo" id="avisoCadEmail" aria-live="polite">{{ avisoEmail() }}</p>
+      </div>
+      <div class="campo">
+        <label for="cadSenha">Senha</label>
+        <input type="password" id="cadSenha" name="cadSenha" #campoCadSenha autocomplete="new-password" placeholder="Ex.: Verso@24"
+               aria-describedby="forcaSenha regrasSenha" [class.campo--invalido]="senhaInvalida()" [(ngModel)]="cadSenha">
+        <!-- validação da senha ao vivo: força + checklist do padrão -->
+        <p class="forca-senha" [class]="'forca-senha forca-senha--' + forca().classe" id="forcaSenha"
+           aria-live="polite" [hidden]="cadSenha() === ''">{{ forca().texto }}</p>
+        <ul class="regras-senha" id="regrasSenha">
+          <li [class.ok]="regras().tamanho">Mínimo de 6 caracteres</li>
+          <li [class.ok]="regras().maiuscula">Uma letra maiúscula</li>
+          <li [class.ok]="regras().especial">Um caractere especial (ex.: &#64; # ! $)</li>
+        </ul>
+      </div>
+      <div class="campo">
+        <label for="cadSenha2">Confirmar senha</label>
+        <input type="password" id="cadSenha2" name="cadSenha2" autocomplete="new-password" placeholder="Repita a senha" [(ngModel)]="cadSenha2">
+      </div>
+      <p class="erro" role="alert">{{ erroCadastro() }}</p>
+      <button class="btn btn--acento btn--bloco" type="submit">Criar conta</button>
+      <p class="dica">A conta é gravada na API, no arquivo api/db.json.</p>
+    </form>
+  </div>
+
+</main>
+
+<!-- ACESSO RÁPIDO: modal de demonstração (só preenche os campos; quem entra é o botão "Entrar") -->
+<div class="modal-demo" #modal [hidden]="!modalVisivel()" [class.aberto]="modalAberto()" (keydown)="teclaNoModal($event)">
+  <div class="modal-demo__fundo" (click)="fecharModal()"></div>
+  <div class="modal-demo__caixa" role="dialog" aria-modal="true" aria-labelledby="tituloDemo" aria-describedby="textoDemo">
+    <button class="modal-demo__fechar" type="button" aria-label="Fechar e entrar manualmente" (click)="fecharModal()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <p class="rotulo">Modo apresentação</p>
+    <h2 id="tituloDemo">Como deseja acessar o sistema?</h2>
+    <p class="modal-demo__texto" id="textoDemo">Escolha um perfil para preencher e-mail e senha. Depois é só conferir e clicar em <strong>Entrar</strong>.</p>
+    <div class="modal-demo__perfis">
+      @for (conta of contasDemo; track conta.perfil; let i = $index) {
+        <button type="button" [class]="'perfil-demo perfil-demo--' + conta.perfil"
+                [style.animation-delay.ms]="120 + i * 80" (click)="escolherPerfil(conta)">
+          <span class="perfil-demo__icone">
+            @if (conta.perfil === 'admin') {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4 5.5v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10v-6Z"/><path d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>
+            } @else {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l1 12.5h-15Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+            }
+          </span>
+          <span class="perfil-demo__texto">
+            <strong>{{ conta.rotulo }}</strong>
+            <span class="perfil-demo__descricao">{{ conta.descricao }}</span>
+            <span class="perfil-demo__email">{{ conta.email }}</span>
+          </span>
+          <span class="perfil-demo__seta" aria-hidden="true">→</span>
+        </button>
+      }
+    </div>
+    <button class="modal-demo__manual" type="button" (click)="fecharModal()">Prefiro digitar meus dados</button>
+  </div>
+</div>

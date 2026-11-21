@@ -1,0 +1,53 @@
+<div class="palco__trilho">
+  <div class="palco__faixa" [style.transform]="'translateX(' + (-atual() * 100) + '%)'">
+    @for (cena of cenas(); track $index; let i = $index) {
+      <article class="cena" [class.ativo]="i === atual()"
+               aria-roledescription="slide" [attr.aria-label]="(i + 1) + ' de ' + cenas().length"
+               [attr.aria-hidden]="i !== atual()" [attr.inert]="i !== atual() ? '' : null">
+        <img class="cena__foto" [src]="cena.foto | img" [alt]="cena.alt" [attr.loading]="i > 0 ? 'lazy' : null">
+
+        <div class="cena__legenda">
+          <p class="cena__rotulo">{{ cena.rotulo }}</p>
+
+          <!-- a primeira cena carrega o h1 da página -->
+          @if (i === 0) {
+            <h1 class="cena__titulo">{{ cena.titulo }}</h1>
+          } @else {
+            <h2 class="cena__titulo">{{ cena.titulo }}</h2>
+          }
+          <p class="cena__detalhe">{{ cena.detalhe }}</p>
+          <p class="cena__linha">{{ cena.linha }}</p>
+
+          <div class="cena__botoes">
+            @for (botao of cena.botoes; track $index) {
+              <a [class]="'btn ' + botao.classe" [routerLink]="botao.link"
+                 [fragment]="botao.fragmento" [queryParams]="botao.queryParams">
+                {{ botao.texto }}
+                @if (botao.preco) { <span class="btn__preco">{{ botao.preco }}</span> }
+              </a>
+            }
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+
+  <div class="palco__controles" [hidden]="sozinha()">
+    <span class="palco__contador" aria-hidden="true">{{ atual() + 1 }} / {{ totalCenas() }}</span>
+    <div class="palco__pontos" role="group" aria-label="Escolher destaque">
+      @for (cena of cenas(); track $index; let i = $index) {
+        <button type="button" class="ponto" [class.ativo]="i === atual()"
+                [attr.aria-current]="i === atual()" [attr.aria-label]="'Mostrar ' + cena.titulo"
+                (click)="ir(i)">
+          <span class="ponto__barra" [appReanimar]="i === atual() ? ciclo() : 0" reanimarClasse="ponto__barra"></span>
+        </button>
+      }
+    </div>
+    <button class="palco__seta" type="button" aria-label="Destaque anterior" (click)="ir(atual() - 1)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <button class="palco__seta" type="button" aria-label="Próximo destaque" (click)="ir(atual() + 1)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>

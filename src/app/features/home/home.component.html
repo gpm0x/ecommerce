@@ -1,0 +1,158 @@
+<main id="conteudo" class="home">
+
+  <p class="home__selo">Streetwear em drops curtos. Curadoria e envio de Guarulhos, SP.</p>
+
+  <!-- PALCO: slideshow com a abertura e TODAS as coleções da loja -->
+  <section appPalco [produtos]="produtos.lista()" [colecoes]="produtos.colecoes()"></section>
+
+  <!-- frase de apresentação -->
+  <section class="intro" appRevelar>
+    <p class="intro__frase">
+      Roupa de rua escolhida peça por peça, provada, medida e fotografada de verdade.
+      <span>Pouca coisa, bem escolhida, para usar todo dia.</span>
+    </p>
+  </section>
+
+  <!-- Lançamentos -->
+  <section class="secao" appRevelar aria-labelledby="tituloLancamentos">
+    <div class="secao__topo">
+      <div>
+        <h2 id="tituloLancamentos">Lançamentos</h2>
+        <p class="secao__sub">O que acabou de entrar no catálogo, direto do último drop.</p>
+      </div>
+      <a class="link-seta" routerLink="/produtos">Ver tudo <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="grade">
+      @for (p of lancamentos(); track p.id; let i = $index) {
+        <article appCardProduto [produto]="p" [posicao]="i + 1"></article>
+      }
+    </div>
+  </section>
+
+  <!-- Coleções temáticas: os blocos são montados a partir do catálogo -->
+  <section class="secao" appRevelar id="colecoes" aria-labelledby="tituloColecoes">
+    <div class="secao__topo">
+      <div>
+        <h2 id="tituloColecoes">Explore as coleções</h2>
+        <p class="secao__sub">Recortes curtos, cada um com uma ideia. {{ produtos.colecoes().length }} {{ produtos.colecoes().length === 1 ? 'coleção' : 'coleções' }} no ar agora.</p>
+      </div>
+      <a class="link-seta" routerLink="/produtos">Ver toda a loja <span aria-hidden="true">&rarr;</span></a>
+    </div>
+
+    <div class="colecoes">
+      @for (c of produtos.colecoes(); track c.nome) {
+        <a class="colecao" routerLink="/produtos" [queryParams]="{ colecao: c.nome }">
+          <div class="colecao__foto">
+            <img [src]="c.capa.imagem | img" [alt]="'Peça da coleção ' + c.nome + ': ' + c.capa.nome" loading="lazy">
+            <span class="colecao__total">{{ c.total }} {{ c.total === 1 ? 'peça' : 'peças' }}</span>
+          </div>
+          <div class="colecao__texto">
+            <h3>{{ c.nome }}</h3>
+            <p>{{ c.texto }}</p>
+          </div>
+        </a>
+      } @empty {
+        <div appVazio mensagem="Nenhuma coleção cadastrada ainda." textoBotao="Ver catálogo" destino="/produtos"></div>
+      }
+    </div>
+
+    <nav class="home-categorias" aria-label="Comprar por categoria">
+      <span class="home-categorias__rotulo">Por categoria</span>
+      @for (cat of categorias; track cat) {
+        <a class="chip" routerLink="/produtos" [queryParams]="{ categoria: cat }">{{ cat }}</a>
+      }
+    </nav>
+  </section>
+
+  <!-- DIFERENCIAL 11: contagem regressiva do próximo drop -->
+  <section class="drop" appRevelar aria-labelledby="tituloDrop">
+    <div class="drop__foto">
+      <img src="assets/img/vitrine/drop-fundo.jpeg" alt="Par de tênis cano alto branco e preto segurado na mão sobre um piso de concreto" loading="lazy">
+    </div>
+    <div class="drop__painel">
+      <p class="rotulo">Próximo drop</p>
+      <h2 id="tituloDrop">Peças novas, poucas unidades</h2>
+      <p class="drop__nota">A lista sai direto no catálogo quando o relógio zerar. Quem chega primeiro leva.</p>
+
+      <ol class="relogio" aria-label="Tempo até o próximo drop">
+        @for (parte of relogio(); track parte.rotulo) {
+          <li><b>{{ parte.valor }}</b><span>{{ parte.rotulo }}</span></li>
+        }
+      </ol>
+
+      <dl class="drop__dados">
+        <div><dt>No ar agora</dt><dd>{{ produtos.lista().length }} peças</dd></div>
+        <div><dt>Frete grátis</dt><dd>acima de R$ {{ freteGratis }}</dd></div>
+        <div><dt>Parcelamento</dt><dd>{{ parcelas }}x sem juros</dd></div>
+      </dl>
+
+      <a class="btn btn--acento" routerLink="/produtos">Ver o catálogo</a>
+    </div>
+  </section>
+
+  <!-- Bloco de confiança numerado 01-04 -->
+  <section class="secao confianca" appRevelar aria-labelledby="tituloConfianca">
+    <div class="confianca__texto">
+      <h2 id="tituloConfianca">Compra sem susto</h2>
+      <p class="secao__sub">O que acontece entre o seu clique e a peça chegar.</p>
+      <ol class="confianca__lista">
+        <li><span class="confianca__num">01</span><div><h3>Peça conferida</h3><p>Costura, etiqueta e medida checadas antes de ir para o estoque.</p></div></li>
+        <li><span class="confianca__num">02</span><div><h3>Troca em 30 dias</h3><p>Tamanho errado acontece. Devolve e troca sem custo extra.</p></div></li>
+        <li><span class="confianca__num">03</span><div><h3>Pagamento seguro</h3><p>Pix, boleto ou cartão em até 6x sem juros.</p></div></li>
+        <li><span class="confianca__num">04</span><div><h3>Envio em 24h</h3><p>Pedido aprovado até 16h sai no mesmo dia útil.</p></div></li>
+      </ol>
+    </div>
+    <img src="assets/img/vitrine/editorial-tenis-manchas.jpg" alt="Detalhe de um tênis cano baixo colorido com estampa de manchas e cadarço grosso" loading="lazy">
+  </section>
+
+  <!-- DIFERENCIAL 12: mais vendidos da semana -->
+  <section class="secao secao--invertida" appRevelar aria-labelledby="tituloVendidos">
+    <div class="secao__topo">
+      <div>
+        <h2 id="tituloVendidos">Mais vendidos</h2>
+        <p class="secao__sub">O ranking da semana, do primeiro ao oitavo lugar.</p>
+      </div>
+      <a class="link-seta" routerLink="/produtos" [queryParams]="{ ordem: 'vendidos' }">Ranking completo <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="grade">
+      @for (p of vendidos(); track p.id; let i = $index) {
+        <article appCardProduto [produto]="p" [posicao]="i + 1" [rank]="i + 1"></article>
+      }
+    </div>
+  </section>
+
+  <!-- faixa de benefícios em rolagem contínua -->
+  <section class="beneficios" aria-label="Benefícios da loja">
+    <div class="beneficios__faixa">
+      @for (volta of [1, 2]; track volta) {
+        @for (b of beneficios; track b) {
+          <span [attr.aria-hidden]="volta === 2 ? 'true' : null">{{ b }}</span>
+        }
+      }
+    </div>
+  </section>
+
+  <!-- Manifesto / o que é o site -->
+  <section class="secao historia" appRevelar aria-labelledby="tituloHistoria">
+    <div class="historia__texto">
+      <p class="rotulo">O que é a VERSO</p>
+      <h2 id="tituloHistoria">Loja pequena, curadoria grande.</h2>
+      <p>A VERSO trabalha em drops curtos. Cada peça entra no catálogo depois de passar por prova, medida e foto real, nada de imagem de fornecedor. São camisetas, calças, conjuntos, chinelos e tênis que a gente consegue explicar de onde vieram.</p>
+      <p>Compra pelo site, retira em Guarulhos ou recebe em casa.</p>
+
+      <dl class="historia__numeros">
+        <div><dt>{{ produtos.lista().length }}</dt><dd>peças no catálogo</dd></div>
+        <div><dt>{{ produtos.colecoes().length }}</dt><dd>coleções no ar</dd></div>
+        <div><dt>24h</dt><dd>para o pedido sair</dd></div>
+      </dl>
+
+      <a class="btn btn--acento" routerLink="/produtos">Começar pelo catálogo</a>
+    </div>
+
+    <figure class="historia__foto">
+      <img src="assets/img/vitrine/editorial-camiseta-letras.jpeg" alt="Homem de costas usando camiseta branca com letras coloridas estampadas" loading="lazy">
+      <figcaption>Prova de caimento antes de a peça entrar no catálogo</figcaption>
+    </figure>
+  </section>
+
+</main>

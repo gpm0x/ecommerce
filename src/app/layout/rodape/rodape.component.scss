@@ -1,0 +1,47 @@
+/* Rodapé: bloco branco arredondado no fim da página. */
+
+.rodape {
+  display: block;
+  padding: 40px var(--margem) var(--margem);
+}
+
+.rodape__interno {
+  max-width: var(--largura); margin: 0 auto;
+  background: var(--cartao); border-radius: var(--raio-grande);
+  padding: clamp(28px, 4vw, 48px);
+}
+
+.rodape__topo { display: grid; gap: 40px; }
+
+.rodape__marca p { margin: 16px 0 0; color: var(--tinta-fraca); font-size: .9rem; }
+
+.rodape__colunas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px 24px; }
+
+.rodape__coluna { display: flex; flex-direction: column; gap: 9px; }
+
+.rodape__coluna h3 { font-size: .85rem; font-weight: 500; color: var(--tinta-fraca); margin-bottom: 4px; }
+
+.rodape__coluna a, .rodape__coluna p { margin: 0; font-size: .92rem; }
+
+.rodape__coluna a { transition: color var(--rapida); }
+
+.rodape__coluna a:hover { color: var(--tinta-fraca); }
+
+.rodape__base {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;
+  margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--linha);
+}
+
+.rodape__base p { margin: 0; font-size: .82rem; color: var(--tinta-fraca); }
+
+.pagamentos { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+
+.pagamentos li {
+  padding: 4px 10px; border-radius: var(--pilula);
+  border: 1px solid var(--linha); font-size: .76rem; color: var(--tinta-media);
+}
+
+@media (min-width: 900px) {
+  .rodape__topo { grid-template-columns: 1fr 2fr; }
+  .rodape__colunas { grid-template-columns: repeat(4, 1fr); }
+}

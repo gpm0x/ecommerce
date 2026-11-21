@@ -1,0 +1,74 @@
+/* Cartões de números (dashboard e relatório). */
+
+/* --- cartões de números (dashboard) --- */
+.resumo-cards {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(2, 1fr);
+  background: var(--linha);
+  border: 1px solid var(--linha);
+  margin-bottom: 48px;
+}
+
+.cartao-numero {
+  background: var(--fundo);
+  padding: 26px 22px;
+  transition: background var(--transicao);
+}
+
+.cartao-numero:hover { background: var(--fundo-2); }
+
+.cartao-numero__valor {
+  display: block;
+  font-family: var(--display);
+  font-size: 2.6rem;
+  line-height: 1;
+  letter-spacing: -.045em;
+  color: var(--acento-texto);
+  margin-bottom: 10px;
+}
+
+.cartao-numero__valor--texto {
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: var(--tinta);
+  letter-spacing: -.02em;
+}
+
+.cartao-numero__rotulo {
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: -.005em;
+  color: var(--tinta-fraca);
+}
+
+.resumo-cards.resumo-cards--dash { grid-template-columns: repeat(2, 1fr); }
+
+.cartao-numero__valor--alerta { color: var(--perigo); }
+
+@media (min-width: 760px) {
+  .resumo-cards.resumo-cards--dash { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 760px) {
+  .resumo-cards { grid-template-columns: repeat(4, 1fr); }
+  .cartao-numero--largo { grid-column: span 4; }
+  .resumo-cards--quatro .cartao-numero--largo { grid-column: auto; }
+}
+
+@media (min-width: 1000px) {
+  .resumo-cards { grid-template-columns: repeat(5, 1fr); }
+  .cartao-numero--largo { grid-column: auto; }
+  .resumo-cards--quatro { grid-template-columns: repeat(4, 1fr); }
+}
+
+.revelar.visivel .cartao-numero { animation: subir 540ms both; }
+
+.revelar.visivel .cartao-numero:nth-child(2) { animation-delay: .06s; }
+
+.revelar.visivel .cartao-numero:nth-child(3) { animation-delay: .12s; }
+
+.revelar.visivel .cartao-numero:nth-child(4) { animation-delay: .18s; }
+
+.revelar.visivel .cartao-numero:nth-child(5) { animation-delay: .24s; }

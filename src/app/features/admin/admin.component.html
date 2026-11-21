@@ -1,0 +1,351 @@
+<main id="conteudo" class="pagina">
+
+  <div class="cabecalho-pagina" appRevelar>
+    <p class="rotulo">Área restrita · administrador</p>
+    <h1>Dashboard da loja</h1>
+    <p class="cabecalho-pagina__linha">Faturamento, clientes e estoque num lugar só. Atualiza sozinho a cada compra finalizada.</p>
+  </div>
+
+  <!-- abas do dashboard: só uma seção aparece por vez -->
+  <div class="dash-abas" role="tablist" aria-label="Seções do dashboard">
+    @for (nome of abas; track nome) {
+      <button class="dash-aba" type="button" role="tab" [class.ativa]="aba() === nome" [attr.aria-selected]="aba() === nome"
+              (click)="mostrarAba(nome)">
+        {{ nomesAbas[nome] }}
+      </button>
+    }
+  </div>
+
+  <!-- ===================== VISÃO GERAL ===================== -->
+  <section class="dash-painel" role="tabpanel" [hidden]="aba() !== 'visao'">
+
+    <div class="resumo-cards resumo-cards--dash" appRevelar aria-label="Indicadores da loja" aria-live="polite">
+      <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="faturamento()" [dinheiro]="true"></span><span class="cartao-numero__rotulo">Faturamento</span></article>
+      <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="totalPedidos()"></span><span class="cartao-numero__rotulo">Pedidos</span></article>
+      <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="ticket()" [dinheiro]="true"></span><span class="cartao-numero__rotulo">Ticket médio</span></article>
+      <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="clientes().length"></span><span class="cartao-numero__rotulo">Clientes cadastrados</span></article>
+      <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="lista().length"></span><span class="cartao-numero__rotulo">Produtos no catálogo</span></article>
+      <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="estoqueTotal()"></span><span class="cartao-numero__rotulo">Peças em estoque</span></article>
+      <article class="cartao-numero"><span class="cartao-numero__valor" [class.cartao-numero__valor--alerta]="estoqueBaixo().length > 0" [appContador]="estoqueBaixo().length"></span><span class="cartao-numero__rotulo">Com estoque baixo</span></article>
+      <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="pecasVendidas()"></span><span class="cartao-numero__rotulo">Peças vendidas</span></article>
+    </div>
+
+    <div class="dash-graficos">
+      <article class="grafico grafico--largo" appRevelar>
+        <header class="grafico__topo">
+          <h2>Faturamento dos últimos 7 dias</h2>
+          <span class="grafico__total">{{ totalSemana() | preco }}</span>
+        </header>
+        <div class="colunas" role="img" [attr.aria-label]="descricaoDias()">
+          @for (dia of dias(); track $index) {
+            <div class="coluna" [class.coluna--hoje]="dia.hoje">
+              <span class="coluna__valor">{{ dia.total > 0 ? (dia.total | preco) : '' }}</span>
+              <div class="coluna__trilho">
+                <div class="coluna__barra" [style.height.%]="dia.altura" [style.animation-delay.s]="$index * 0.06"></div>
+              </div>
+              <span class="coluna__dia">{{ dia.rotulo }}</span>
+            </div>
+          }
+        </div>
+      </article>
+
+      <ng-template #barras let-lista let-vazio="vazio">
+        <div class="barras">
+          @for (b of lista; track b.rotulo) {
+            <div class="barra">
+              <div class="barra__topo">
+                <span class="barra__rotulo">{{ b.rotulo }}</span>
+                <span class="barra__valor">{{ b.texto }}</span>
+              </div>
+              <div class="barra__trilho">
+                <div class="barra__preenchida" [style.width.%]="b.largura" [style.animation-delay.s]="$index * 0.07"></div>
+              </div>
+            </div>
+          } @empty {
+            <p class="grafico__vazio">{{ vazio }}</p>
+          }
+        </div>
+      </ng-template>
+
+      <article class="grafico" appRevelar>
+        <header class="grafico__topo"><h2>Faturamento por categoria</h2></header>
+        <ng-container *ngTemplateOutlet="barras; context: { $implicit: porCategoria(), vazio: 'Nenhuma venda registrada ainda.' }" />
+      </article>
+
+      <article class="grafico" appRevelar>
+        <header class="grafico__topo"><h2>Mais vendidos</h2></header>
+        <ng-container *ngTemplateOutlet="barras; context: { $implicit: top(), vazio: 'Nenhum produto cadastrado.' }" />
+      </article>
+
+      <article class="grafico" appRevelar>
+        <header class="grafico__topo"><h2>Estoque por categoria</h2></header>
+        <ng-container *ngTemplateOutlet="barras; context: { $implicit: estoquePorCategoria(), vazio: 'Nenhum produto cadastrado.' }" />
+      </article>
+
+      <article class="grafico" appRevelar>
+        <header class="grafico__topo"><h2>Estoque baixo</h2><span class="pill">{{ estoqueBaixo().length }}</span></header>
+        <ul class="lista-alerta">
+          @for (p of estoqueBaixo(); track p.id) {
+            <li class="lista-alerta__item">
+              <span class="lista-alerta__nome">{{ p.nome }}</span>
+              <span [class]="classeEstoque(p)">{{ textoEstoque(p) }}</span>
+              <button type="button" class="btn-editar" (click)="repor(p)">Repor</button>
+            </li>
+          } @empty {
+            <li class="grafico__vazio">Todo o estoque está em dia.</li>
+          }
+        </ul>
+      </article>
+
+      <article class="grafico grafico--largo" appRevelar>
+        <header class="grafico__topo"><h2>Melhores clientes</h2></header>
+        <ng-container *ngTemplateOutlet="barras; context: { $implicit: melhoresClientes(), vazio: 'Nenhum cliente comprou ainda.' }" />
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== PRODUTOS (cadastrar, listar, editar, excluir) ===================== -->
+  <section class="dash-painel" role="tabpanel" [hidden]="aba() !== 'produtos'">
+    <div class="admin">
+
+      <section class="admin__form" #secaoForm appRevelar aria-labelledby="tituloNovoProduto">
+        <h2 id="tituloNovoProduto">{{ idEmEdicao() !== null ? 'Editar peça' : 'Nova peça' }}</h2>
+        <form class="formulario" novalidate (submit)="salvarProduto($event)">
+          <div class="campo">
+            <label for="pNome">Nome</label>
+            <input type="text" id="pNome" name="nome" #campoNome placeholder="Camiseta Oversized Ribana" [(ngModel)]="form.nome">
+          </div>
+
+          <div class="campo-duplo">
+            <div class="campo">
+              <label for="pCategoria">Categoria</label>
+              <select id="pCategoria" name="categoria" [(ngModel)]="form.categoria">
+                @for (c of opcoesCategoria(); track c) { <option [value]="c">{{ c }}</option> }
+              </select>
+            </div>
+            <div class="campo">
+              <label for="pColecao">Coleção</label>
+              <select id="pColecao" name="colecao" [(ngModel)]="form.colecao">
+                <option value="">Nenhuma</option>
+                @for (c of opcoesColecao(); track c) { <option [value]="c">{{ c }}</option> }
+              </select>
+            </div>
+          </div>
+
+          <div class="campo-duplo">
+            <div class="campo">
+              <label for="pPreco">Preço (R$)</label>
+              <input type="number" id="pPreco" name="preco" min="0" step="0.01" placeholder="189.90" [(ngModel)]="form.preco">
+            </div>
+            <div class="campo">
+              <label for="pPrecoAntigo">Preço antigo (opcional)</label>
+              <input type="number" id="pPrecoAntigo" name="precoAntigo" min="0" step="0.01" placeholder="249.90" [(ngModel)]="form.precoAntigo">
+            </div>
+          </div>
+
+          <div class="campo-duplo">
+            <div class="campo">
+              <label for="pEstoque">Estoque (unidades)</label>
+              <input type="number" id="pEstoque" name="estoque" #campoEstoque min="0" step="1" placeholder="20" [(ngModel)]="form.estoque">
+            </div>
+            <div class="campo">
+              <label for="pCor">Cor</label>
+              <input type="text" id="pCor" name="cor" placeholder="Preto" [(ngModel)]="form.cor">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="pTamanhos">Tamanhos (separados por vírgula)</label>
+            <input type="text" id="pTamanhos" name="tamanhos" placeholder="P, M, G, GG" [(ngModel)]="form.tamanhos">
+          </div>
+
+          <div class="campo">
+            <label for="pDescricao">Descrição</label>
+            <textarea id="pDescricao" name="descricao" rows="3" placeholder="Malha pesada, caimento solto, gola ribana." [(ngModel)]="form.descricao"></textarea>
+          </div>
+
+          <!-- imagem escolhida entre as que já existem em public/assets/img/ -->
+          <div class="campo">
+            <label for="pImagem">Imagem (pasta assets/img/)</label>
+            <select id="pImagem" name="imagem" [(ngModel)]="form.imagem">
+              @for (img of opcoesImagem(); track img) { <option [value]="img">{{ img.replace('assets/img/', '') }}</option> }
+            </select>
+          </div>
+          <img class="admin__previa" [src]="form.imagem | img" [alt]="'Prévia de ' + form.imagem.replace('assets/img/', '')">
+
+          <div class="campo-caixas">
+            <label><input type="checkbox" name="destaque" [(ngModel)]="form.destaque"> Destaque</label>
+            <label><input type="checkbox" name="lancamento" [(ngModel)]="form.lancamento"> Lançamento</label>
+          </div>
+
+          <p class="erro" role="alert">{{ erroProduto() }}</p>
+          <button class="btn btn--acento btn--bloco" type="submit">{{ idEmEdicao() !== null ? 'Salvar alterações' : 'Cadastrar produto' }}</button>
+          <button class="btn btn--vazado btn--bloco" type="button" [hidden]="idEmEdicao() === null" (click)="sairDaEdicao()">Cancelar edição</button>
+        </form>
+      </section>
+
+      <section class="admin__tabela" appRevelar aria-labelledby="tituloTabelaProdutos">
+        <h2 id="tituloTabelaProdutos">Produtos cadastrados <span class="pill">{{ lista().length }}</span></h2>
+        <div class="dash-filtros">
+          <div class="campo">
+            <label for="buscaProdutoAdmin">Buscar</label>
+            <input type="search" id="buscaProdutoAdmin" placeholder="Nome, cor ou coleção" [(ngModel)]="buscaProduto">
+          </div>
+          <div class="campo">
+            <label for="filtroCategoriaAdmin">Categoria</label>
+            <select id="filtroCategoriaAdmin" [(ngModel)]="filtroCategoria">
+              <option value="">Todas</option>
+              @for (c of categorias(); track c) { <option [value]="c">{{ c }}</option> }
+            </select>
+          </div>
+        </div>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead>
+              <tr><th>Foto</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Vendidos</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="corpoTabelaProdutos">
+              @for (p of produtosFiltrados(); track p.id) {
+                <tr>
+                  <td><img class="mini-foto" [src]="p.imagem | img" [alt]="p.nome" loading="lazy"></td>
+                  <td>{{ p.nome }}</td>
+                  <td>{{ p.categoria }}</td>
+                  <td>{{ p.preco | preco }}</td>
+                  <td><span [class]="classeEstoque(p)">{{ textoEstoque(p) }}</span></td>
+                  <td>{{ p.vendidos }}</td>
+                  <td class="tabela__acoes">
+                    <button type="button" class="btn-editar" (click)="entrarEmEdicao(p)">Editar</button>
+                    <button type="button" class="btn-remover" (click)="excluir(p)">Excluir</button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="7" class="tabela__vazio">{{ lista().length ? 'Nenhum produto encontrado.' : 'Nenhum produto cadastrado.' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- ===================== CLIENTES ===================== -->
+  <section class="dash-painel" role="tabpanel" [hidden]="aba() !== 'clientes'">
+    <div class="dash-clientes">
+      <section class="bloco-tabela" appRevelar aria-labelledby="tituloClientes">
+        <h2 id="tituloClientes">Clientes <span class="pill">{{ clientes().length }}</span></h2>
+        <p class="nota">A senha dos clientes nunca é exibida.</p>
+        <div class="dash-filtros dash-filtros--um">
+          <div class="campo">
+            <label for="buscaCliente">Buscar cliente</label>
+            <input type="search" id="buscaCliente" placeholder="Nome ou e-mail" [(ngModel)]="buscaCliente">
+          </div>
+        </div>
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead><tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Pedidos</th><th>Total gasto</th><th>Último pedido</th><th></th></tr></thead>
+            <tbody>
+              @for (c of clientesFiltrados(); track c.id) {
+                <tr [class.tabela__linha--ativa]="c.id === idClienteAberto()">
+                  <td>{{ c.id }}</td>
+                  <td>{{ c.nome }}</td>
+                  <td>{{ c.email }}</td>
+                  <td>{{ resumoDe(c.id).pedidos }}</td>
+                  <td>{{ resumoDe(c.id).total | preco }}</td>
+                  <td>{{ resumoDe(c.id).ultimo?.data ?? '—' }}</td>
+                  <td><button type="button" class="btn-editar" (click)="abrirFicha(c.id, fichaEl)">Ver</button></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="7" class="tabela__vazio">{{ clientes().length ? 'Nenhum cliente encontrado.' : 'Nenhum cliente cadastrado ainda.' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ficha com os dados e o histórico de compras do cliente escolhido -->
+      <aside class="ficha-cliente" #fichaEl aria-live="polite">
+        @if (ficha(); as f) {
+          <div class="ficha-cliente__topo">
+            <span class="ficha-cliente__avatar">{{ f.cliente.nome.charAt(0).toUpperCase() }}</span>
+            <div>
+              <h3 class="ficha-cliente__nome">{{ f.cliente.nome }}</h3>
+              <p class="ficha-cliente__email">{{ f.cliente.email }}</p>
+            </div>
+            <button type="button" class="btn-icone ficha-cliente__fechar" aria-label="Fechar ficha do cliente"
+                    (click)="idClienteAberto.set(null)">×</button>
+          </div>
+
+          <dl class="ficha-cliente__dados">
+            @for (par of f.dados; track par[0]) {
+              <div><dt>{{ par[0] }}</dt><dd>{{ par[1] }}</dd></div>
+            }
+          </dl>
+
+          <h4 class="ficha-cliente__subtitulo">Histórico de compras</h4>
+          @if (f.pedidos.length) {
+            <ul class="ficha-cliente__pedidos">
+              @for (pedido of f.pedidos; track pedido.id) {
+                <li>
+                  <div class="ficha-cliente__pedido">
+                    <strong>#{{ pedido.id }}</strong><span>{{ pedido.data }}</span><strong>{{ pedido.total | preco }}</strong>
+                  </div>
+                  <ul class="lista-itens">
+                    @for (item of pedido.itens; track $index) {
+                      <li>{{ item.quantidade }}x {{ item.nome }} ({{ item.tamanho }})</li>
+                    }
+                  </ul>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="grafico__vazio">Esse cliente ainda não fez pedidos.</p>
+          }
+        } @else {
+          <p class="ficha-cliente__vazio">Clique em <strong>Ver</strong> para abrir a ficha de um cliente.</p>
+        }
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== PEDIDOS ===================== -->
+  <section class="dash-painel" role="tabpanel" [hidden]="aba() !== 'pedidos'">
+    <section class="bloco-tabela" appRevelar aria-labelledby="tituloPedidos">
+      <h2 id="tituloPedidos">Pedidos <span class="pill">{{ pedidos().length }}</span></h2>
+      <div class="tabela-rolagem">
+        <table class="tabela">
+          <thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Itens</th><th>Cupom</th><th>Total</th></tr></thead>
+          <tbody>
+            @for (pedido of pedidosRecentes(); track pedido.id) {
+              <tr>
+                <td>#{{ pedido.id }}</td>
+                <td>{{ pedido.data }}</td>
+                <td>{{ nomeDoCliente(pedido.idUsuario) }}</td>
+                <td>
+                  <ul class="lista-itens">
+                    @for (item of pedido.itens; track $index) {
+                      <li>{{ item.quantidade }}x {{ item.nome }} ({{ item.tamanho }}) — {{ item.preco | preco }}</li>
+                    }
+                  </ul>
+                </td>
+                <td>{{ pedido.cupom || '—' }}</td>
+                <td>{{ pedido.total | preco }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="tabela__vazio">Nenhum pedido registrado ainda.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="zona-perigo" appRevelar>
+      <div>
+        <h2>Limpar dados da loja</h2>
+        <p>Apaga produtos, usuários, pedidos, carrinhos e favoritos, e recria o catálogo inicial.</p>
+      </div>
+      <button class="btn btn--perigo" type="button" (click)="limparDados()">Limpar e recriar</button>
+    </section>
+  </section>
+
+</main>

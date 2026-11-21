@@ -1,0 +1,13 @@
+/* Ajustes do Angular. */
+
+/* ===== AJUSTES DO ANGULAR =====
+ Os componentes de página    e o app-root são elementos extras na árvore;
+ como blocos comuns, eles não mudam o layout que o CSS já esperava. */
+app-root {
+    display: block;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 240ms;
+}

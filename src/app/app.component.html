@@ -1,0 +1,34 @@
+<a class="pular" href="#conteudo" (click)="pular($event)">Pular para o conteúdo</a>
+
+<!-- faixa de aviso: benefícios em rolagem contínua (marquee em CSS puro) -->
+<div class="aviso">
+  <div class="aviso__faixa">
+    @for (volta of [1, 2]; track volta) {
+      <span><b>Frete grátis</b> acima de R$ 299</span>
+      <span><b>Troca em 30 dias</b> usada ou não</span>
+      <span><b>6x sem juros</b> no cartão</span>
+      <span><b>Cupom VERSO10</b> 10% na primeira compra</span>
+    }
+  </div>
+</div>
+
+<!-- a API (json-server) não respondeu: explica como ligar -->
+@if (api.offline()) {
+  <p class="api-offline" role="alert">
+    A API está desligada. Rode <code>npm run dev</code> (ou <code>npm run api</code>) para carregar os dados de <code>api/db.json</code>.
+  </p>
+}
+
+<header appCabecalho></header>
+
+<router-outlet />
+
+<footer appRodape></footer>
+
+<app-gaveta />
+
+<div class="toast-area" aria-live="polite">
+  @for (toast of toasts.toasts(); track toast.id) {
+    <div class="toast">{{ toast.texto }}</div>
+  }
+</div>

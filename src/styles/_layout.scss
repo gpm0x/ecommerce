@@ -1,0 +1,136 @@
+/* Layout compartilhado: página interna, seções, grade, logo, selos, frete. */
+
+/* --- marca: palavra em minúsculas, sem símbolo --- */
+.logo { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+.logo__texto {
+  font-family: var(--display); font-size: 1.6rem; font-weight: 600; line-height: 1;
+  letter-spacing: -.06em;
+}
+
+/* --- cortina + gaveta do mini-carrinho --- */
+body.sem-rolagem { overflow: hidden; }
+
+.gaveta__rodape .frete__barra { margin-bottom: 18px; }
+
+.secao {
+  max-width: var(--largura); margin: 0 auto;
+  padding: 64px var(--margem);
+}
+
+/* bloco com fundo branco arredondado, solto do papel da página */
+.secao--invertida {
+  max-width: calc(var(--largura) - 2 * var(--margem));
+  background: var(--cartao);
+  border-radius: var(--raio-grande);
+  margin-inline: var(--margem);
+  padding-inline: clamp(18px, 3vw, 40px);
+}
+
+@media (min-width: 1400px) {
+  .secao--invertida { margin-inline: auto; }
+}
+
+.secao__topo {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 14px 24px; margin-bottom: 28px;
+}
+
+.secao__topo h2 { max-width: 22ch; }
+
+.secao__sub {
+  margin: 10px 0 0; max-width: 52ch;
+  color: var(--tinta-fraca); font-size: .95rem;
+}
+
+.secao__topo > div .rotulo { margin: 0 0 .6em; }
+
+.secao__topo > .rotulo { margin: 0; }
+
+/* grade de produtos: cards soltos, sem moldura */
+.grade {
+  display: grid; gap: 28px 14px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.selo {
+  position: absolute; top: 12px; left: 12px; z-index: 3;
+  background: var(--destaque); color: #fff;
+  padding: 4px 10px; border-radius: var(--pilula);
+  font-size: .72rem; font-weight: 500;
+}
+
+.selo--destaque { background: var(--cartao); color: var(--tinta); }
+
+/* quando a peça tem desconto E é destaque, o destaque desce */
+.selo + .selo--destaque { top: 42px; }
+
+.rodape__marca .logo__texto { font-size: 2.4rem; }
+
+.pagina {
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 40px var(--margem) 90px;
+}
+
+.pagina--estreita { max-width: 580px; }
+
+/* seção dentro de página interna já tem a margem da .pagina */
+.pagina .secao { padding-inline: 0; padding-bottom: 0; }
+
+.cabecalho-pagina { margin-bottom: 34px; }
+
+.cabecalho-pagina h1 { font-size: clamp(2.2rem, 5.4vw, 3.8rem); }
+
+.cabecalho-pagina__linha {
+  color: var(--tinta-fraca);
+  max-width: 58ch;
+  margin-top: 14px;
+  font-size: .98rem;
+}
+
+.frete { margin-bottom: 24px; }
+
+.frete p {
+  font-size: .82rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.frete__barra {
+  height: 6px;
+  background: var(--fundo-3);
+  overflow: hidden;
+  border-radius: var(--pilula);
+}
+
+.frete__barra span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--tinta);
+  border-radius: inherit;
+  transition: width 560ms cubic-bezier(.2, .8, .25, 1);
+}
+
+.resumo .link-seta { margin-top: 20px; }
+
+#btnCancelarEdicao { margin-top: 10px; }
+
+#corpoTabelaProdutos td:nth-child(4) { white-space: nowrap; }
+
+@media (min-width: 760px) {
+  :root { --margem: 32px; }
+  .grade { grid-template-columns: repeat(3, 1fr); gap: 36px 18px; }
+}
+
+@media (min-width: 1000px) {
+  .grade { grid-template-columns: repeat(4, 1fr); }
+  .secao { padding: 84px var(--margem); }
+}
+
+@media (max-width: 480px) {
+  .logo__texto { font-size: 1.4rem; }
+}
+
+body.saindo main { opacity: 0; transform: translateY(-12px); }

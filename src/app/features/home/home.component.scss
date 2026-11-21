@@ -1,0 +1,211 @@
+/* Home: seções abaixo do palco. */
+
+.home__selo {
+  max-width: var(--largura); margin: 0 auto;
+  padding: 18px var(--margem) 14px;
+  font-size: .85rem; color: var(--tinta-fraca);
+}
+
+/* --- frase de apresentação --- */
+.intro {
+  max-width: var(--largura); margin: 0 auto;
+  padding: 84px var(--margem) 8px;
+}
+
+.intro__frase {
+  margin: 0; max-width: 30ch;
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(1.6rem, 3.6vw, 2.8rem); line-height: 1.12; letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.intro__frase span { color: var(--tinta-fraca); }
+
+/* --- coleções em blocos --- */
+.colecoes {
+  display: grid; gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+.colecao { display: flex; flex-direction: column; gap: 14px; }
+
+.colecao__foto {
+  position: relative; overflow: hidden;
+  aspect-ratio: 4 / 5; border-radius: var(--raio-grande); background: var(--fundo-2);
+}
+
+.colecao__foto img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 1000ms cubic-bezier(.2,.8,.25,1);
+}
+
+.colecao:hover .colecao__foto img { transform: scale(1.04); }
+
+.colecao__total {
+  position: absolute; left: 14px; bottom: 14px;
+  padding: 5px 11px; border-radius: var(--pilula);
+  background: rgba(255,255,255,.88); backdrop-filter: blur(8px);
+  font-size: .8rem; font-weight: 500;
+}
+
+.colecao__texto { padding: 0 2px; }
+
+.colecao__texto h3 {
+  font-family: var(--display); font-size: 1.4rem; font-weight: 500; letter-spacing: -.035em;
+}
+
+.colecao__texto p {
+  margin: 6px 0 0; color: var(--tinta-fraca); font-size: .9rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* --- chips de categoria --- */
+.home-categorias {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--linha);
+}
+
+.home-categorias__rotulo { font-size: .85rem; color: var(--tinta-fraca); margin-right: 6px; }
+
+/* --- próximo drop: foto + painel com relógio --- */
+.drop {
+  max-width: var(--largura); margin: 0 auto;
+  padding: 16px var(--margem);
+  display: grid; gap: 14px;
+}
+
+.drop__foto { overflow: hidden; border-radius: var(--raio-grande); background: var(--fundo-2); }
+
+.drop__foto img { width: 100%; height: 100%; min-height: 320px; object-fit: cover; }
+
+.drop__painel {
+  background: var(--cartao); border-radius: var(--raio-grande);
+  padding: clamp(24px, 4vw, 48px);
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+
+.drop__nota { margin: 12px 0 0; color: var(--tinta-fraca); max-width: 42ch; }
+
+.relogio {
+  list-style: none; margin: 28px 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%;
+}
+
+.relogio li {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 14px 12px; border-radius: var(--raio);
+  background: var(--fundo);
+}
+
+.relogio b {
+  font-family: var(--display); font-size: clamp(1.8rem, 3.4vw, 2.6rem); font-weight: 500;
+  line-height: 1; letter-spacing: -.04em; font-variant-numeric: tabular-nums;
+}
+
+.relogio span { font-size: .78rem; color: var(--tinta-fraca); }
+
+.drop__dados {
+  margin: 24px 0 28px; width: 100%;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+
+.drop__dados div { border-top: 1px solid var(--linha); padding-top: 12px; }
+
+.drop__dados dt { font-size: .78rem; color: var(--tinta-fraca); }
+
+.drop__dados dd { margin: 2px 0 0; font-size: .92rem; font-weight: 500; }
+
+/* --- confiança: lista numerada + foto --- */
+.confianca { display: grid; gap: 40px; align-items: center; }
+
+.confianca__lista { list-style: none; margin: 28px 0 0; padding: 0; }
+
+.confianca__lista li {
+  display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+  padding: 18px 0; border-top: 1px solid var(--linha);
+}
+
+.confianca__lista li:last-child { border-bottom: 1px solid var(--linha); }
+
+.confianca__num { font-size: .85rem; color: var(--tinta-fraca); font-variant-numeric: tabular-nums; padding-top: 1px; }
+
+.confianca__lista p { margin: 4px 0 0; color: var(--tinta-fraca); font-size: .92rem; }
+
+.confianca > img {
+  width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
+  border-radius: var(--raio-grande); background: var(--fundo-2);
+}
+
+/* --- faixa de benefícios --- */
+.beneficios {
+  overflow: hidden; padding: 56px 0 8px;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.beneficios__faixa {
+  display: flex; width: max-content;
+  animation: correr 46s linear infinite;
+}
+
+.beneficios__faixa span {
+  display: inline-flex; align-items: center; gap: 40px; margin-right: 40px;
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(1.4rem, 3vw, 2.2rem); letter-spacing: -.035em; white-space: nowrap;
+}
+
+.beneficios__faixa span::after {
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--linha-forte);
+}
+
+.beneficios:hover .beneficios__faixa { animation-play-state: paused; }
+
+/* --- história --- */
+.historia { display: grid; gap: 40px; align-items: center; }
+
+.historia__texto > p:not(.rotulo) { color: var(--tinta-media); max-width: 52ch; }
+
+.historia__texto h2 { margin-bottom: 20px; max-width: 14ch; }
+
+.historia__numeros {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin: 30px 0 32px;
+}
+
+.historia__numeros div { border-top: 1px solid var(--linha); padding-top: 14px; }
+
+.historia__numeros dt {
+  font-family: var(--display); font-size: clamp(1.8rem, 3.4vw, 2.6rem); font-weight: 500;
+  letter-spacing: -.04em; line-height: 1;
+}
+
+.historia__numeros dd { margin: 6px 0 0; font-size: .85rem; color: var(--tinta-fraca); }
+
+.historia__foto { margin: 0; }
+
+.historia__foto img {
+  width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
+  border-radius: var(--raio-grande); background: var(--fundo-2);
+}
+
+.historia__foto figcaption { margin-top: 10px; font-size: .85rem; color: var(--tinta-fraca); }
+
+@media (min-width: 640px) {
+  .colecoes { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 900px) {
+  .colecoes { grid-template-columns: repeat(3, 1fr); }
+  .drop { grid-template-columns: 1.1fr 1fr; }
+  .confianca { grid-template-columns: 1fr 1fr; gap: 64px; }
+  .historia { grid-template-columns: 1.1fr 1fr; gap: 64px; }
+}
+
+@media (max-width: 480px) {
+  .relogio li { padding: 12px 10px 10px; }
+  .drop__dados { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beneficios__faixa { animation: none; }
+}

@@ -1,0 +1,15 @@
+<main id="conteudo" class="pagina">
+  <div class="cabecalho-pagina" appRevelar>
+    <p class="rotulo">Sua lista</p>
+    <h1>Favoritos</h1>
+    <p class="cabecalho-pagina__linha">Clique de novo no coração para tirar a peça da lista.</p>
+  </div>
+
+  <div class="grade">
+    @for (p of lista(); track p.id; let i = $index) {
+      <article appCardProduto [produto]="p" [posicao]="i + 1"></article>
+    } @empty {
+      <div appVazio mensagem="Você ainda não salvou nenhuma peça." textoBotao="Ver catálogo" destino="/produtos"></div>
+    }
+  </div>
+</main>

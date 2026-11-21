@@ -1,0 +1,45 @@
+<div class="cortina" [class.aberta]="ui.gavetaAberta()" (click)="ui.fecharGaveta()"></div>
+<aside class="gaveta" [class.aberta]="ui.gavetaAberta()" aria-label="Resumo do carrinho">
+    <div class="gaveta__topo">
+      <h2>Seu carrinho</h2>
+      <button type="button" class="gaveta__fechar" (click)="ui.fecharGaveta()" aria-label="Fechar carrinho">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 19 19M19 5 5 19"/></svg>
+      </button>
+    </div>
+
+    @if (linhas().length === 0) {
+      <div class="gaveta__vazio">
+        <p>Ainda não tem nada aqui.</p>
+        <a class="btn btn--acento" routerLink="/produtos">Ver catálogo</a>
+      </div>
+    } @else {
+      <div class="gaveta__lista">
+        @for (linha of linhas(); track aberturas() + '-' + $index) {
+          <article class="gaveta__item" [style.animation-delay.s]="$index * 0.06">
+            <img [src]="linha.produto.imagem | img" [alt]="linha.produto.nome" loading="lazy">
+            <div>
+              <strong>{{ linha.produto.nome }}</strong>
+              <span>Tam {{ linha.item.tamanho }} · {{ linha.item.quantidade }}x</span>
+              <span class="gaveta__preco">{{ linha.produto.preco * linha.item.quantidade | preco }}</span>
+            </div>
+            <button type="button" class="gaveta__tirar" (click)="remover(linha.posicao)"
+                    [attr.aria-label]="'Remover ' + linha.produto.nome">Remover</button>
+          </article>
+        }
+      </div>
+
+      <div class="gaveta__rodape">
+        <p class="gaveta__frete">
+          @if (carrinho.subtotal() >= freteGratis) { Frete grátis liberado. }
+          @else { Faltam {{ freteGratis - carrinho.subtotal() | preco }} para o frete grátis }
+        </p>
+        <div class="frete__barra"><span [style.width.%]="porcentoFrete()"></span></div>
+        <div class="gaveta__total">
+          <span>Subtotal</span>
+          <strong>{{ carrinho.subtotal() | preco }}</strong>
+        </div>
+        <a class="btn btn--acento btn--bloco" routerLink="/carrinho">Fechar pedido</a>
+        <button type="button" class="gaveta__continuar" (click)="ui.fecharGaveta()">Continuar comprando</button>
+      </div>
+    }
+</aside>

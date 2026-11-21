@@ -1,0 +1,45 @@
+<div class="rodape__interno">
+  <div class="rodape__topo">
+    <div class="rodape__marca">
+      <a class="logo" routerLink="/" aria-label="VERSO, ir para a página inicial">
+        <span class="logo__texto">verso</span>
+      </a>
+      <p>Streetwear em drops curtos.<br>Curadoria e envio de Guarulhos, SP.</p>
+    </div>
+
+    <div class="rodape__colunas">
+      <div class="rodape__coluna">
+        <h3>Loja</h3>
+        <a routerLink="/produtos">Todas as peças</a>
+        <a routerLink="/produtos" [queryParams]="{ categoria: 'Tênis' }">Tênis</a>
+        <a routerLink="/produtos" [queryParams]="{ categoria: 'Camisetas' }">Camisetas</a>
+        <a routerLink="/produtos" [queryParams]="{ ordem: 'vendidos' }">Mais vendidos</a>
+      </div>
+      <div class="rodape__coluna">
+        <h3>Coleções</h3>
+        <a routerLink="/produtos" [queryParams]="{ colecao: 'Asfalto' }">Asfalto</a>
+        <a routerLink="/produtos" [queryParams]="{ colecao: 'Quadra' }">Quadra</a>
+        <a routerLink="/produtos" [queryParams]="{ colecao: 'Verão 88' }">Verão 88</a>
+      </div>
+      <div class="rodape__coluna">
+        <h3>Conta</h3>
+        <a routerLink="/login">Entrar ou criar conta</a>
+        <a routerLink="/favoritos">Favoritos</a>
+        <a routerLink="/carrinho">Carrinho</a>
+      </div>
+      <div class="rodape__coluna">
+        <h3>Contato</h3>
+        <p>Seg a sex, 9h às 18h</p>
+        <p>contato&#64;verso.com.br</p>
+        <p>(11) 4002-8922</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rodape__base">
+    <p>&copy; {{ ano }} VERSO. Trabalho acadêmico, dados servidos por uma API local (api/db.json).</p>
+    <ul class="pagamentos" aria-label="Formas de pagamento">
+      <li>Pix</li><li>Visa</li><li>Master</li><li>Elo</li><li>Boleto</li>
+    </ul>
+  </div>
+</div>

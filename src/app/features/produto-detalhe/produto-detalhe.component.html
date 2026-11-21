@@ -1,0 +1,79 @@
+<main id="conteudo" class="pagina">
+
+  <nav class="migalhas" aria-label="Você está em">
+    <a routerLink="/">Início</a> <span aria-hidden="true">/</span>
+    <a routerLink="/produtos">Catálogo</a> <span aria-hidden="true">/</span>
+    <span>{{ produto()?.nome ?? 'Produto' }}</span>
+  </nav>
+
+  <section class="detalhe" appRevelar>
+    @if (produto(); as produto) {
+      <div class="detalhe__foto">
+        <img [src]="produto.imagem | img" [alt]="produto.nome + ' na cor ' + produto.cor">
+        @if (desconto() > 0) { <span class="selo">-{{ desconto() }}%</span> }
+      </div>
+
+      <div class="detalhe__info">
+        <p class="rotulo">{{ produto.categoria }}{{ produto.colecao ? ' · Coleção ' + produto.colecao : '' }}</p>
+        <h1>{{ produto.nome }}</h1>
+        <p class="detalhe__preco">
+          @if (produto.precoAntigo) { <s>{{ produto.precoAntigo | preco }}</s> }
+          <strong>{{ produto.preco | preco }}</strong>
+        </p>
+        <!-- DIFERENCIAL 13: parcelamento calculado -->
+        <p class="detalhe__parcela">ou {{ parcelas }}x de {{ produto.preco / parcelas | preco }} sem juros</p>
+        <p class="detalhe__descricao">{{ produto.descricao }}</p>
+        <p class="detalhe__cor">Cor: {{ produto.cor }}</p>
+
+        <!-- seletor de tamanho (obrigatório) -->
+        <p class="rotulo">Tamanho</p>
+        <div class="tamanhos">
+          @for (valor of produto.tamanhos; track valor) {
+            <button type="button" class="tamanho" [class.ativo]="tamanho() === valor" (click)="escolherTamanho(valor)">{{ valor }}</button>
+          }
+        </div>
+
+        <div appQuantidade [valor]="quantidade()" (mudar)="mudarQuantidade($event)"></div>
+
+        <p class="erro">{{ aviso() }}</p>
+
+        <div class="detalhe__botoes">
+          <button type="button" class="btn btn--acento" (click)="adicionar()">Adicionar ao carrinho</button>
+          <button type="button" class="btn btn--vazado" (click)="alternarFavorito()">
+            {{ favorito() ? 'Remover dos favoritos' : 'Favoritar' }}
+          </button>
+          <!-- Editar produto: só aparece para o administrador -->
+          @if (sessao.ehAdmin()) {
+            <a class="btn btn--claro detalhe__editar" routerLink="/admin" [queryParams]="{ editar: produto.id }">Editar produto</a>
+          }
+        </div>
+
+        <ul class="detalhe__lista">
+          @for (texto of entrega; track texto) { <li>{{ texto }}</li> }
+        </ul>
+      </div>
+    } @else {
+      <div appVazio mensagem="Essa peça não está mais no catálogo." textoBotao="Ver catálogo" destino="/produtos"></div>
+    }
+  </section>
+
+  <section class="secao" appRevelar [hidden]="relacionados().length === 0">
+    <div class="secao__topo"><h2>Combina com</h2></div>
+    <div class="grade">
+      @for (p of relacionados(); track p.id; let i = $index) {
+        <article appCardProduto [produto]="p" [posicao]="i + 1"></article>
+      }
+    </div>
+  </section>
+
+  <!-- DIFERENCIAL 12: vistos recentemente -->
+  <section class="secao" appRevelar [hidden]="vistos().length === 0">
+    <div class="secao__topo"><h2>Vistos recentemente</h2></div>
+    <div class="grade">
+      @for (p of vistos(); track p.id; let i = $index) {
+        <article appCardProduto [produto]="p" [posicao]="i + 1"></article>
+      }
+    </div>
+  </section>
+
+</main>

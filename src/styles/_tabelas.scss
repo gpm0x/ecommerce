@@ -1,0 +1,93 @@
+/* Tabelas e zona de perigo (dashboard e relatório). */
+
+.tabela__acoes { white-space: nowrap; }
+
+/* --- tabelas --- */
+.tabela-rolagem {
+  overflow-x: auto;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.tabela th, .tabela td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--linha);
+  font-size: .85rem;
+  vertical-align: middle;
+}
+
+.tabela th {
+  background: var(--fundo-2);
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: -.005em;
+  color: var(--tinta-fraca);
+  white-space: nowrap;
+}
+
+.tabela td:first-child {
+  font-family: var(--mono);
+  font-size: .85rem;
+  color: var(--tinta-fraca);
+}
+
+.tabela tbody tr { transition: background var(--rapida); }
+
+.tabela tbody tr:hover { background: var(--fundo-2); }
+
+.tabela__vazio {
+  text-align: center;
+  color: var(--tinta-fraca);
+  padding: 40px 16px;
+  font-family: var(--mono);
+  font-size: .8rem;
+  letter-spacing: -.005em;
+}
+
+.lista-itens {
+  margin: 0;
+  padding-left: 16px;
+  font-size: .8rem;
+  color: var(--tinta-fraca);
+}
+
+.bloco-tabela { margin-bottom: 48px; }
+
+.bloco-tabela h2 {
+  font-size: 1.8rem;
+  margin-bottom: 18px;
+}
+
+.zona-perigo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--perigo);
+  border-radius: 10px;
+  padding: 28px;
+  background: rgba(255, 77, 55, .05);
+}
+
+.zona-perigo h2 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.zona-perigo p {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--tinta-fraca);
+  max-width: 48ch;
+}
+
+.tabela__linha--ativa { background: var(--acento-fundo); }

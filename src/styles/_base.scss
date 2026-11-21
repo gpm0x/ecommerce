@@ -1,0 +1,104 @@
+/* Base: reset, tipografia e utilitários. */
+
+* { box-sizing: border-box; }
+
+/* O site esconde coisas com o atributo hidden (busca do topo, aba de
+   criar conta, resumo do carrinho, "carregar mais"...). Qualquer
+   regra de display com classe venceria o [hidden] do navegador —
+   esta linha garante que esconder continue escondendo. */
+[hidden] { display: none !important; }
+
+html {
+  scroll-behavior: smooth;
+  background: var(--fundo);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--corpo);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: -.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; }
+
+a { color: inherit; text-decoration: none; }
+
+/* --- escala de títulos: frase comum, peso médio, aperto leve --- */
+h1, h2 {
+  font-family: var(--display);
+  font-weight: 500;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 {
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  line-height: 1.02;
+  letter-spacing: -.04em;
+}
+h2 {
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  line-height: 1.06;
+  letter-spacing: -.035em;
+}
+h3 {
+  font-family: var(--corpo);
+  font-weight: 600;
+  font-size: 1.02rem;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+  margin: 0;
+}
+
+p { margin: 0 0 1em; }
+
+strong, b { font-weight: 600; }
+
+svg {
+  width: 20px; height: 20px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+
+::selection { background: var(--tinta); color: var(--fundo); }
+
+/* âncora não para debaixo do cabeçalho fixo */
+[id] { scroll-margin-top: 96px; }
+
+:focus-visible { outline: 2px solid var(--tinta); outline-offset: 3px; border-radius: 4px; }
+
+input, select, textarea, button { font-family: var(--corpo); }
+
+
+/* --- utilitários --- */
+
+.oculto {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.pular {
+  position: absolute; left: -999px; top: 0; z-index: 300;
+  background: var(--tinta); color: var(--fundo);
+  padding: 12px 18px; border-radius: 0 0 var(--raio) 0;
+  font-size: .85rem; font-weight: 500;
+}
+.pular:focus { left: 0; }
+
+/* rótulo pequeno acima dos títulos: a voz discreta do site */
+.rotulo, .eixo {
+  display: block;
+  font-family: var(--corpo); font-size: .8rem; font-weight: 500;
+  letter-spacing: -.005em;
+  color: var(--tinta-fraca);
+  margin: 0 0 .8em;
+}
+.rotulo--acento { color: var(--tinta); }

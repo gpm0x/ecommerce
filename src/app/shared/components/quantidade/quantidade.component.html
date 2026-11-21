@@ -1,0 +1,3 @@
+<button type="button" (click)="mudar.emit(-1)" [attr.aria-label]="'Diminuir quantidade' + sufixo()">−</button>
+<span>{{ valor() }}</span>
+<button type="button" (click)="mudar.emit(1)" [attr.aria-label]="'Aumentar quantidade' + sufixo()">+</button>

@@ -1,0 +1,24 @@
+<a class="card__foto" [routerLink]="['/produto', produto().id]">
+  <img [src]="produto().imagem | img" [alt]="produto().nome + ' na cor ' + produto().cor" loading="lazy">
+  @if (desconto() > 0) { <span class="selo">-{{ desconto() }}%</span> }
+  @if (produto().destaque) { <span class="selo selo--destaque">Mais pedido</span> }
+</a>
+
+<!-- DIFERENCIAL 8: coração de favorito -->
+<button type="button" class="coracao" [class.ativo]="favorito()"
+        [appReanimar]="pulo()" reanimarClasse="pulo"
+        (click)="alternar()" [attr.aria-label]="'Favoritar ' + produto().nome">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C12 20.5 3.5 14.4 3.5 8.9A4.6 4.6 0 0 1 12 6.4a4.6 4.6 0 0 1 8.5 2.5c0 5.5-8.5 11.6-8.5 11.6Z"/></svg>
+</button>
+
+<div class="card__info">
+  <h3 class="card__nome"><a [routerLink]="['/produto', produto().id]">{{ produto().nome }}</a></h3>
+  <p class="card__categoria">{{ produto().categoria }} · {{ produto().cor }}</p>
+  <p class="card__preco">
+    @if (produto().precoAntigo) { <s>{{ produto().precoAntigo! | preco }}</s> }
+    <strong>{{ produto().preco | preco }}</strong>
+  </p>
+  <p class="card__parcela">{{ parcelas }}x de {{ produto().preco / parcelas | preco }}</p>
+</div>
+
+@if (rank()) { <span class="rank">{{ rank()! | dois }}</span> }

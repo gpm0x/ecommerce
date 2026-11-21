@@ -1,0 +1,201 @@
+/* Navbar: logo, menu, ações, busca com sugestões e barra de progresso. */
+
+/* O vidro fosco mora numa camada de fundo (::before), não no próprio
+   header: elemento com backdrop-filter vira bloco de contenção e
+   prenderia o menu de tela cheia (position: fixed) dentro da barra. */
+.cabecalho {
+  position: sticky; top: 0; z-index: 90;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: transform 460ms cubic-bezier(.2,.8,.25,1), border-color 240ms ease;
+}
+
+.cabecalho::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--fundo);
+}
+
+@supports (backdrop-filter: blur(4px)) {
+  .cabecalho::before {
+    background: color-mix(in srgb, var(--fundo) 88%, transparent);
+    backdrop-filter: blur(16px) saturate(140%);
+  }
+}
+
+.cabecalho.compacto { border-bottom-color: var(--linha); }
+
+.cabecalho.escondido { transform: translateY(-110%); }
+
+.cabecalho__interno {
+  position: relative;
+  max-width: var(--largura); margin: 0 auto;
+  padding: 14px var(--margem);
+  display: flex; align-items: center; gap: 14px;
+  transition: padding 300ms cubic-bezier(.2,.8,.25,1);
+}
+
+.cabecalho.compacto .cabecalho__interno { padding-block: 10px; }
+
+/* --- menu --- */
+.menu { display: none; position: relative; gap: 2px; }
+
+.menu a {
+  position: relative;
+  padding: 8px 13px; border-radius: var(--pilula);
+  font-size: .9rem; font-weight: 500; letter-spacing: -.01em;
+  color: var(--tinta-media);
+  transition: color var(--rapida), background var(--rapida);
+}
+
+.menu a:hover { color: var(--tinta); background: var(--fundo-3); }
+
+.menu a.ativo { color: var(--tinta); background: var(--cartao); box-shadow: 0 0 0 1px var(--linha); }
+
+/* o risco que deslizava sob os links saiu do visual novo */
+.menu__indicador { display: none; }
+
+/* --- ações à direita --- */
+.acoes { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+
+.btn-menu { display: inline-flex; }
+
+.contador {
+  position: absolute; top: 2px; right: 1px;
+  min-width: 17px; height: 17px; padding: 0 4px;
+  display: grid; place-items: center; border-radius: var(--pilula);
+  background: var(--tinta); color: var(--sobre-acento);
+  border: 2px solid var(--fundo);
+  font-size: .62rem; font-weight: 600; line-height: 1;
+}
+
+.btn-conta {
+  margin-left: 8px; padding: 9px 16px; border-radius: var(--pilula);
+  background: var(--tinta); color: var(--sobre-acento);
+  font-size: .85rem; font-weight: 500; white-space: nowrap;
+  transition: background var(--rapida);
+}
+
+.btn-conta:hover { background: #2C2F31; }
+
+/* --- barra de progresso de leitura --- */
+.progresso-scroll {
+  position: absolute; left: 0; bottom: -1px; height: 1px; width: 0;
+  background: var(--tinta); z-index: 3;
+  transition: width 120ms linear;
+}
+
+/* --- busca do topo: painel solto sob o header --- */
+.busca-topo {
+  position: absolute; top: calc(100% + 8px); left: var(--margem); right: var(--margem);
+  z-index: 5;
+  max-width: 720px; margin: 0 auto;
+  display: flex; gap: 8px; padding: 8px;
+  background: var(--cartao); border: 1px solid var(--linha);
+  border-radius: var(--pilula); box-shadow: var(--sombra-flutuante);
+}
+
+.busca-topo input {
+  flex: 1; min-width: 0; padding: 12px 18px;
+  border: 0; border-radius: var(--pilula);
+  background: transparent; color: var(--tinta);
+  font-size: .95rem;
+}
+
+.busca-topo input:focus { outline: none; }
+
+.busca-topo input::placeholder { color: var(--tinta-fraca); }
+
+/* --- sugestões --- */
+.sugestoes {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+  background: var(--cartao); border: 1px solid var(--linha); border-radius: var(--raio-grande);
+  box-shadow: var(--sombra-flutuante); padding: 6px;
+  z-index: 50; max-height: 58vh; overflow-y: auto;
+  opacity: 0; transform: translateY(-8px); pointer-events: none;
+  transition: opacity 220ms ease, transform 240ms cubic-bezier(.2,.8,.25,1);
+}
+
+.sugestoes.aberta { opacity: 1; transform: none; pointer-events: auto; }
+
+.sugestao {
+  display: flex; align-items: center; gap: 14px; padding: 8px 10px;
+  border-radius: var(--raio);
+  animation: entrarSugestao 320ms cubic-bezier(.2,.8,.25,1) both;
+  transition: background var(--rapida);
+}
+
+.sugestao:hover { background: var(--fundo); }
+
+.sugestao img {
+  width: 48px; height: 56px; object-fit: cover; background: var(--fundo-2); border-radius: 8px;
+}
+
+.sugestao div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.sugestao strong { font-size: .92rem; font-weight: 500; }
+
+.sugestao span { font-size: .82rem; color: var(--tinta-fraca); }
+
+.sugestoes__vazio {
+  margin: 0; padding: 22px 16px; text-align: center;
+  font-size: .88rem; color: var(--tinta-fraca);
+}
+
+@media (min-width: 1000px) {
+  .btn-menu { display: none; }
+  .cabecalho__interno { display: grid; grid-template-columns: 1fr auto 1fr; }
+  .menu { display: flex; }
+  .acoes { justify-self: end; }
+}
+
+@media (max-width: 999px) {
+  .menu {
+    display: none; position: fixed; inset: 0; z-index: 94;
+    flex-direction: column; justify-content: center; gap: 0;
+    margin: 0; padding: 0 var(--margem);
+    background: var(--fundo);
+  }
+  .menu.aberto { display: flex; animation: abrirMenuCheio 300ms ease both; }
+  .menu.aberto a {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(2rem, 10vw, 3rem);
+    letter-spacing: -.04em; line-height: 1.1;
+    color: var(--tinta); background: transparent; border-radius: 0; box-shadow: none;
+    padding: 12px 0; border-bottom: 1px solid var(--linha);
+    animation: entrarLinkMenu 420ms cubic-bezier(.2,.8,.25,1) both;
+  }
+  .menu.aberto a:nth-child(1) { animation-delay: .04s; }
+  .menu.aberto a:nth-child(2) { animation-delay: .08s; }
+  .menu.aberto a:nth-child(3) { animation-delay: .12s; }
+  .menu.aberto a:nth-child(4) { animation-delay: .16s; }
+  .menu.aberto a:nth-child(5) { animation-delay: .2s; }
+  .menu.aberto a:nth-child(6) { animation-delay: .24s; }
+  .menu.aberto a:hover, .menu.aberto a.ativo { color: var(--tinta-fraca); }
+  .btn-menu { position: relative; z-index: 95; }
+  .acoes { gap: 0; }
+}
+
+@media (max-width: 480px) {
+  .cabecalho__interno { gap: 8px; padding: 12px 16px; }
+  .btn-conta { margin-left: 4px; padding: 8px 12px; font-size: .8rem; }
+}
+
+.contador.pulsa { animation: pulsa 560ms cubic-bezier(.2,.8,.25,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sugestao { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+
+@keyframes entrarSugestao {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes pulsa { 0% { transform: scale(1); } 35% { transform: scale(1.4); } 100% { transform: scale(1); } }
+
+@keyframes abrirMenuCheio { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes entrarLinkMenu {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}

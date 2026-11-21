@@ -1,0 +1,8 @@
+<p>{{ mensagem() }}</p>
+@if (textoBotao()) {
+  @if (destino()) {
+    <a class="btn btn--acento" [routerLink]="destino()">{{ textoBotao() }}</a>
+  } @else {
+    <button type="button" class="btn btn--acento" (click)="acao.emit()">{{ textoBotao() }}</button>
+  }
+}

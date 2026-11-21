@@ -1,0 +1,86 @@
+<main id="conteudo" class="pagina">
+
+  <div class="cabecalho-pagina" appRevelar>
+    <p class="rotulo">Área restrita</p>
+    <h1>Relatório da loja</h1>
+    <p class="cabecalho-pagina__linha">Vendas, produtos e clientes da loja. Atualiza sozinho a cada compra finalizada.</p>
+  </div>
+
+  <section class="resumo-cards" appRevelar aria-label="Resumo" aria-live="polite">
+    <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="produtos.lista().length"></span><span class="cartao-numero__rotulo">Produtos</span></article>
+    <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="sessao.usuarios().length"></span><span class="cartao-numero__rotulo">Usuários</span></article>
+    <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="pedidos.lista().length"></span><span class="cartao-numero__rotulo">Pedidos</span></article>
+    <article class="cartao-numero"><span class="cartao-numero__valor" [appContador]="totalVendido()" [dinheiro]="true"></span><span class="cartao-numero__rotulo">Valor vendido</span></article>
+    <article class="cartao-numero cartao-numero--largo"><span class="cartao-numero__valor cartao-numero__valor--texto">{{ campeao() }}</span><span class="cartao-numero__rotulo">Produto mais vendido</span></article>
+  </section>
+
+  <section class="bloco-tabela" appRevelar aria-labelledby="tituloPedidos">
+    <h2 id="tituloPedidos">Pedidos</h2>
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Itens</th><th>Cupom</th><th>Total</th></tr></thead>
+        <tbody>
+          @for (pedido of pedidosRecentes(); track pedido.id) {
+            <tr>
+              <td>#{{ pedido.id }}</td>
+              <td>{{ pedido.data }}</td>
+              <td>{{ nomeDoCliente(pedido.idUsuario) }}</td>
+              <td>
+                <ul class="lista-itens">
+                  @for (item of pedido.itens; track $index) {
+                    <li>{{ item.quantidade }}x {{ item.nome }} ({{ item.tamanho }}) — {{ item.preco | preco }}</li>
+                  }
+                </ul>
+              </td>
+              <td>{{ pedido.cupom || '—' }}</td>
+              <td>{{ pedido.total | preco }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="tabela__vazio">Nenhum pedido registrado ainda.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="bloco-tabela" appRevelar aria-labelledby="tituloProdutosRel">
+    <h2 id="tituloProdutosRel">Produtos no estoque</h2>
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead><tr><th>ID</th><th>Nome</th><th>Categoria</th><th>Coleção</th><th>Preço</th><th>Vendidos</th></tr></thead>
+        <tbody>
+          @for (p of produtos.lista(); track p.id) {
+            <tr>
+              <td>{{ p.id }}</td><td>{{ p.nome }}</td><td>{{ p.categoria }}</td>
+              <td>{{ p.colecao || '—' }}</td><td>{{ p.preco | preco }}</td><td>{{ p.vendidos }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="bloco-tabela" appRevelar aria-labelledby="tituloUsuarios">
+    <h2 id="tituloUsuarios">Usuários cadastrados</h2>
+    <p class="nota">A senha nunca é exibida no relatório.</p>
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead><tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Tipo</th></tr></thead>
+        <tbody>
+          @for (u of sessao.usuarios(); track u.id) {
+            <tr><td>{{ u.id }}</td><td>{{ u.nome }}</td><td>{{ u.email }}</td><td>{{ u.tipo }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="zona-perigo" appRevelar>
+    <div>
+      <h2>Limpar dados da loja</h2>
+      <p>Apaga produtos, usuários, pedidos, carrinhos e favoritos, e recria o catálogo inicial.</p>
+    </div>
+    <button class="btn btn--perigo" type="button" (click)="limparDados()">Limpar e recriar</button>
+  </section>
+
+</main>

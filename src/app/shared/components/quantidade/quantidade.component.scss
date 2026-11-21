@@ -1,0 +1,36 @@
+/* Controle de quantidade "−  1  +". */
+
+.quantidade {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  width: fit-content;
+  margin-bottom: 20px;
+}
+
+.quantidade button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--tinta);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background var(--rapida), color var(--rapida), transform var(--rapida);
+}
+
+.quantidade button:hover {
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.quantidade button:active { transform: scale(.88); }
+
+.quantidade span {
+  min-width: 44px;
+  text-align: center;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: .88rem;
+}

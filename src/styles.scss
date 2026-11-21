@@ -1,0 +1,12 @@
+/* VERSO — estilos GLOBAIS (o que vale para o site inteiro).
+   O estilo de cada área fica no .component.scss do próprio componente. */
+
+@use 'styles/tokens';
+@use 'styles/base';
+@use 'styles/botoes';
+@use 'styles/layout';
+@use 'styles/formularios';
+@use 'styles/tabelas';
+@use 'styles/cartoes';
+@use 'styles/animacoes';
+@use 'styles/angular';

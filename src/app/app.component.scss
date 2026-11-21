@@ -1,0 +1,63 @@
+/* Faixa de aviso (ticker), link "pular" e toasts — partes da moldura do app. */
+
+.aviso {
+  background: var(--tinta); color: rgba(255,255,255,.72);
+  overflow: hidden; padding: 9px 0;
+}
+
+.aviso__faixa {
+  display: flex; align-items: center; width: max-content;
+  white-space: nowrap; animation: correr 40s linear infinite;
+  font-size: .8rem; font-weight: 400; letter-spacing: -.005em;
+}
+
+.aviso__faixa span { margin-right: 56px; } /* margem (não gap) para o laço não dar solavanco */
+
+.aviso__faixa b { color: #fff; font-weight: 500; }
+
+.aviso:hover .aviso__faixa { animation-play-state: paused; }
+
+.toast-area {
+  position: fixed; z-index: 97; left: var(--margem); right: var(--margem); bottom: 22px;
+  display: flex; flex-direction: column; gap: 10px; align-items: center;
+  pointer-events: none;
+}
+
+.toast {
+  position: relative; overflow: hidden;
+  background: var(--tinta); color: var(--sobre-acento);
+  padding: 13px 20px; max-width: 420px; border-radius: var(--pilula);
+  font-family: var(--corpo); font-size: .88rem; font-weight: 500;
+  box-shadow: var(--sombra-flutuante);
+  animation: entraToast 300ms cubic-bezier(.2,.8,.25,1) both;
+}
+
+.toast::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 3px;
+  background: var(--sobre-acento); width: 100%; opacity: .3;
+  animation: tempoToast 3s linear forwards;
+}
+
+@media (min-width: 760px) {
+  .toast-area { left: auto; right: 34px; align-items: flex-end; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast::after { animation: none; width: 0; }
+  .aviso__faixa { animation: none; }
+}
+
+@keyframes correr { to { transform: translateX(-50%); } }
+
+@keyframes entraToast { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+
+@keyframes tempoToast { to { width: 0; } }
+
+/* aviso de API desligada (json-server fora do ar) */
+.api-offline {
+  margin: 0; padding: 12px var(--margem);
+  background: var(--perigo); color: #fff;
+  font-size: .85rem; text-align: center;
+}
+
+.api-offline code { font-weight: 700; }

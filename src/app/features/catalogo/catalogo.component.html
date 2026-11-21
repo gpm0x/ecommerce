@@ -1,0 +1,64 @@
+<main id="conteudo" class="pagina">
+
+  <div class="cabecalho-pagina" appRevelar>
+    <h1>Todas as peças</h1>
+    <p class="cabecalho-pagina__linha">Camisetas, calças, conjuntos, chinelos e tênis, escolhidos peça a peça e fotografados de verdade.</p>
+  </div>
+
+  <nav class="categorias" aria-label="Categorias">
+    <button type="button" class="chip" [class.ativo]="categoria() === ''" (click)="categoria.set(''); reiniciar()">Todas</button>
+    @for (c of categorias(); track c) {
+      <button type="button" class="chip" [class.ativo]="categoria() === c" (click)="categoria.set(c); reiniciar()">{{ c }}</button>
+    }
+  </nav>
+
+  <!-- DIFERENCIAL 2: busca e filtros em tempo real -->
+  <form class="filtros" (submit)="$event.preventDefault()">
+    <div class="filtros__campo filtros__campo--busca">
+      <label for="campoBusca">Buscar</label>
+      <input type="search" id="campoBusca" name="busca" placeholder="Nome, cor ou descrição"
+             [(ngModel)]="busca" (ngModelChange)="reiniciar()">
+    </div>
+    <div class="filtros__campo">
+      <label for="filtroCategoria">Categoria</label>
+      <select id="filtroCategoria" name="categoria" [(ngModel)]="categoria" (ngModelChange)="reiniciar()">
+        <option value="">Todas</option>
+        @for (c of categorias(); track c) { <option [value]="c">{{ c }}</option> }
+      </select>
+    </div>
+    <div class="filtros__campo">
+      <label for="filtroColecao">Coleção</label>
+      <select id="filtroColecao" name="colecao" [(ngModel)]="colecao" (ngModelChange)="reiniciar()">
+        <option value="">Todas</option>
+        @for (c of colecoes(); track c) { <option [value]="c">{{ c }}</option> }
+      </select>
+    </div>
+    <div class="filtros__campo">
+      <label for="filtroOrdem">Ordenar por</label>
+      <select id="filtroOrdem" name="ordem" [(ngModel)]="ordem" (ngModelChange)="reiniciar()">
+        <option value="padrao">Relevância</option>
+        <option value="menor">Menor preço</option>
+        <option value="maior">Maior preço</option>
+        <option value="az">Nome (A-Z)</option>
+        <option value="vendidos">Mais vendidos</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn--vazado" (click)="limpar()">Limpar</button>
+  </form>
+
+  <p class="contagem">{{ resultado().length }} {{ resultado().length === 1 ? 'produto encontrado' : 'produtos encontrados' }}</p>
+
+  <div class="grade">
+    @for (p of pagina(); track p.id; let i = $index) {
+      <article appCardProduto [produto]="p" [posicao]="i + 1"></article>
+    } @empty {
+      <div appVazio mensagem="Nenhuma peça bate com esses filtros." textoBotao="Limpar filtros" (acao)="limpar()"></div>
+    }
+  </div>
+
+  <!-- DIFERENCIAL 14: botão carregar mais -->
+  <div class="carregar-mais">
+    <button class="btn btn--acento" type="button" [hidden]="visiveis() >= resultado().length" (click)="carregarMais()">Carregar mais</button>
+  </div>
+
+</main>

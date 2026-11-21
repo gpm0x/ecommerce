@@ -1,0 +1,76 @@
+<div class="cabecalho__interno">
+  <button class="btn-icone btn-menu" type="button" (click)="alternarMenu()"
+          aria-label="Abrir menu" [attr.aria-expanded]="menuAberto()">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      @if (menuAberto()) { <path d="M5 5 19 19M19 5 5 19"/> } @else { <path d="M3 6h18M3 12h18M3 18h18"/> }
+    </svg>
+  </button>
+
+  <a class="logo" routerLink="/" aria-label="VERSO, ir para a página inicial">
+    <span class="logo__texto">verso</span>
+  </a>
+
+  <nav class="menu" #menu [class.aberto]="menuAberto()" aria-label="Menu principal"
+       (mouseleave)="remedirIndicador()">
+    <a routerLink="/" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
+       (mouseenter)="moverIndicador($event.target)">Início</a>
+    <a routerLink="/produtos" routerLinkActive="ativo" (mouseenter)="moverIndicador($event.target)">Loja</a>
+    <a routerLink="/produtos" [queryParams]="{ categoria: 'Tênis' }" (mouseenter)="moverIndicador($event.target)">Tênis</a>
+    <a routerLink="/produtos" [queryParams]="{ categoria: 'Camisetas' }" (mouseenter)="moverIndicador($event.target)">Camisetas</a>
+    <a routerLink="/" fragment="colecoes" (mouseenter)="moverIndicador($event.target)">Coleções</a>
+    <!-- o Dashboard só existe no menu para quem é admin -->
+    @if (sessao.ehAdmin()) {
+      <a class="menu__admin" routerLink="/admin" routerLinkActive="ativo"
+         (mouseenter)="moverIndicador($event.target)">Dashboard</a>
+    }
+    <span class="menu__indicador" [class.visivel]="indicador()"
+          [style.left.px]="indicador()?.left" [style.width.px]="indicador()?.width"></span>
+  </nav>
+
+  <div class="acoes">
+    <button class="btn-icone" type="button" (click)="alternarBusca()"
+            aria-label="Abrir busca" [attr.aria-expanded]="buscaAberta()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 L21 21"/></svg>
+    </button>
+    <a class="btn-icone" routerLink="/favoritos" aria-label="Favoritos">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C12 20.5 3.5 14.4 3.5 8.9A4.6 4.6 0 0 1 12 6.4a4.6 4.6 0 0 1 8.5 2.5c0 5.5-8.5 11.6-8.5 11.6Z"/></svg>
+      <!-- DIFERENCIAL 3: contadores sempre atualizados -->
+      <span class="contador" [appReanimar]="ui.pulsoFavoritos()" reanimarClasse="pulsa">{{ favoritos.total() }}</span>
+    </a>
+    <a class="btn-icone" href="/carrinho" (click)="abrirCarrinho($event)" aria-label="Carrinho">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l1 12.5h-15Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="contador" [appReanimar]="ui.pulsoCarrinho()" reanimarClasse="pulsa">{{ carrinho.quantidadeTotal() }}</span>
+    </a>
+    @if (sessao.usuario()) {
+      <a class="btn-conta" href="#" (click)="sair($event)">{{ primeiroNome() }} · sair</a>
+    } @else {
+      <a class="btn-conta" routerLink="/login">Entrar</a>
+    }
+  </div>
+</div>
+
+<form class="busca-topo" [hidden]="!buscaAberta()" role="search" (submit)="buscar($event)">
+  <label class="oculto" for="campoBuscaTopo">Buscar peças</label>
+  <input type="search" id="campoBuscaTopo" #campoBusca placeholder="Camiseta, calça, tênis..."
+         [ngModel]="termo()" (ngModelChange)="digitou($event)" name="termo"
+         (keydown.escape)="fecharSugestoes()">
+  <button class="btn btn--acento" type="submit">Buscar</button>
+
+  <div class="sugestoes" [class.aberta]="sugestoesVisiveis()">
+    @if (sugestoesVisiveis()) {
+      @for (p of sugestoes(); track p.id; let i = $index) {
+        <a class="sugestao" [routerLink]="['/produto', p.id]" [style.animation-delay.s]="i * 0.05">
+          <img [src]="p.imagem | img" [alt]="p.nome" loading="lazy">
+          <div>
+            <strong>{{ p.nome }}</strong>
+            <span>{{ p.categoria }} · {{ p.preco | preco }}</span>
+          </div>
+        </a>
+      } @empty {
+        <p class="sugestoes__vazio">Nada encontrado para “{{ termo().trim() }}”</p>
+      }
+    }
+  </div>
+</form>
+
+<span class="progresso-scroll" [style.width.%]="progresso()"></span>

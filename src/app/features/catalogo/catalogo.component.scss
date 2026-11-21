@@ -1,0 +1,75 @@
+/* Catálogo: faixa de categorias, filtros, contagem e "carregar mais". */
+
+/* categorias em pílulas, logo abaixo do título */
+.categorias {
+  display: flex; gap: 6px; overflow-x: auto;
+  margin: 0 0 18px; padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.categorias::-webkit-scrollbar { display: none; }
+
+/* --- filtros --- */
+.filtros {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+  padding: 18px;
+  border-radius: var(--raio-grande);
+  background: var(--cartao);
+  margin-bottom: 28px;
+}
+
+.filtros__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.filtros__campo label {
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: -.005em;
+  color: var(--tinta-fraca);
+}
+
+.filtros input, .filtros select {
+  padding: 13px 14px;
+  border: 1px solid var(--linha);
+  border-radius: var(--pilula);
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--corpo);
+  font-size: .92rem;
+  transition: border-color var(--rapida), background var(--rapida);
+}
+
+.filtros input:focus, .filtros select:focus {
+  border-color: var(--linha-forte);
+  outline: none;
+}
+
+.filtros select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.contagem {
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: -.005em;
+  color: var(--tinta-fraca);
+  margin-bottom: 18px;
+}
+
+.carregar-mais {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+@media (min-width: 760px) {
+  .filtros { grid-template-columns: 2fr 1fr 1fr 1fr auto; align-items: end; }
+}

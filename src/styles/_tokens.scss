@@ -1,0 +1,50 @@
+/* Tokens: cores, fontes e medidas (variáveis CSS).
+
+   =========================================================
+   VERSO — "PAPEL / TINTA"
+   Direção: loja calma e editorial. Fundo off-white, tinta
+   quase preta, bordas finas translúcidas, cantos macios e
+   botões em pílula. Um único tema (claro).
+
+   Tipografia:  Bricolage Grotesque (títulos) · Inter (texto)
+   ========================================================= */
+
+:root {
+  --fundo:        #F7F7F5;   /* papel da página */
+  --fundo-2:      #EEEBE4;   /* fundo das fotos e blocos */
+  --fundo-3:      #E9E9E6;   /* hover / áreas recolhidas */
+  --tinta:        #151617;
+  --tinta-media:  #4D5154;
+  --tinta-fraca:  #6C7073;
+  --linha:        rgba(21, 22, 23, .12);
+  --linha-forte:  rgba(21, 22, 23, .24);
+
+  /* o "acento" agora é a própria tinta: botões e destaques escuros */
+  --acento:       #151617;
+  --acento-texto: #151617;
+  --acento-fundo: rgba(21, 22, 23, .06);
+  --sobre-acento: #FFFFFF;
+
+  --destaque:     #F0482B;   /* vermelho só para promoção e alertas */
+  --perigo:       #DC3E22;
+
+  --escuro:       #151617;
+  --sobre-escuro: #F7F7F5;
+  --cartao:       #FFFFFF;
+
+  --display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --corpo:   "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --mono:    var(--corpo);   /* rótulos pequenos usam a mesma família do texto */
+
+  --raio:       12px;
+  --raio-grande: 22px;
+  --pilula:     999px;
+
+  --largura: 1360px;
+  --margem: 20px;
+  --transicao: 320ms cubic-bezier(.2, .8, .25, 1);
+  --rapida: 180ms cubic-bezier(.3, .9, .3, 1);
+
+  --sombra-dura: none;
+  --sombra-flutuante: 0 24px 60px -24px rgba(21, 22, 23, .24);
+}

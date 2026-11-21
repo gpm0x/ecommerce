@@ -1,0 +1,78 @@
+<main id="conteudo" class="pagina">
+
+  <div class="cabecalho-pagina" appRevelar>
+    <p class="rotulo">Checkout</p>
+    <h1>Seu carrinho</h1>
+  </div>
+
+  <div class="carrinho" appRevelar>
+    <section class="carrinho__itens" aria-label="Itens do carrinho">
+      <div>
+        @for (linha of linhas(); track $index) {
+          @if (linha.produto; as produto) {
+            <article class="item">
+              <img [src]="produto.imagem | img" [alt]="produto.nome" loading="lazy">
+              <div class="item__info">
+                <h3><a [routerLink]="['/produto', produto.id]">{{ produto.nome }}</a></h3>
+                <p class="item__detalhe">Tamanho {{ linha.item.tamanho }} · {{ produto.cor }}</p>
+                <div appQuantidade [valor]="linha.item.quantidade" [nomeProduto]="produto.nome"
+                     (mudar)="mudarQuantidade(linha.posicao, $event)"></div>
+                <button type="button" class="item__remover" (click)="remover(linha.posicao)">Remover</button>
+              </div>
+              <p class="item__preco">{{ produto.preco * linha.item.quantidade | preco }}</p>
+            </article>
+          } @else {
+            <article class="item">Peça removida do catálogo.</article>
+          }
+        } @empty {
+          <div appVazio mensagem="Seu carrinho está vazio." textoBotao="Ver catálogo" destino="/produtos"></div>
+        }
+      </div>
+    </section>
+
+    <aside class="resumo" [hidden]="linhas().length === 0">
+      <h2>Resumo</h2>
+
+      <!-- DIFERENCIAL 10: barra de progresso do frete grátis -->
+      <div class="frete">
+        <p>
+          @if (freteGratis()) { Frete grátis liberado. }
+          @else { Faltam {{ falta() | preco }} para o frete grátis }
+        </p>
+        <div class="frete__barra"><span [style.width.%]="porcentoFrete()"></span></div>
+      </div>
+
+      <!-- DIFERENCIAL 9: cupom de desconto -->
+      <form class="cupom" (submit)="aplicarCupom($event)">
+        <label for="campoCupom">Cupom de desconto</label>
+        <div class="cupom__linha">
+          <input type="text" id="campoCupom" name="cupom" placeholder="VERSO10" autocomplete="off" [(ngModel)]="codigoCupom">
+          <button class="btn btn--vazado" type="submit">Aplicar</button>
+        </div>
+        <p class="erro" role="status">{{ erroCupom() }}</p>
+      </form>
+
+      <dl class="resumo__valores">
+        <div><dt>Subtotal</dt><dd>{{ subtotal() | preco }}</dd></div>
+        <div [hidden]="desconto() === 0"><dt>Desconto</dt><dd>- {{ desconto() | preco }}</dd></div>
+        <div><dt>Frete</dt><dd>{{ freteGratis() ? 'Grátis' : (frete() | preco) }}</dd></div>
+        <div class="resumo__total"><dt>Total</dt><dd>{{ total() | preco }}</dd></div>
+      </dl>
+
+      <button class="btn btn--acento btn--bloco" type="button" [disabled]="finalizando()" (click)="finalizar()">{{ finalizando() ? 'Fechando pedido...' : 'Finalizar compra' }}</button>
+
+      <!-- visitante tentou fechar o pedido: pede login ou cadastro (o carrinho fica guardado) -->
+      <div class="aviso-conta" #avisoConta role="alert" tabindex="-1" [hidden]="!mostrarAvisoConta()"
+           [appReanimar]="avisoNovo()" reanimarClasse="aviso-conta--novo">
+        <p class="aviso-conta__titulo">Entre para fechar o pedido</p>
+        <p class="aviso-conta__texto">Para finalizar a compra você precisa entrar na sua conta ou criar uma. Suas peças continuam no carrinho.</p>
+        <div class="aviso-conta__botoes">
+          <a class="btn btn--acento" routerLink="/login" [queryParams]="{ voltar: '/carrinho' }">Entrar</a>
+          <a class="btn btn--claro" routerLink="/login" [queryParams]="{ voltar: '/carrinho', aba: 'criar' }">Criar conta</a>
+        </div>
+      </div>
+      <a class="link-seta" routerLink="/produtos">Continuar comprando</a>
+    </aside>
+  </div>
+
+</main>

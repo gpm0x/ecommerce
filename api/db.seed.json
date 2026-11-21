@@ -1,0 +1,748 @@
+{
+  "produtos": [
+    {
+      "id": 1,
+      "nome": "Camiseta Ribana Gráfica",
+      "categoria": "Camisetas",
+      "preco": 179.9,
+      "descricao": "Malha pesada preta com ribana contrastante na gola e nos punhos. Caimento solto, ombro caído.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/camiseta-ribana-grafica.jpg",
+      "destaque": true,
+      "lancamento": false,
+      "vendidos": 94,
+      "colecao": "Asfalto",
+      "estoque": 15
+    },
+    {
+      "id": 2,
+      "nome": "Camiseta Clube Pôr do Sol",
+      "categoria": "Camisetas",
+      "preco": 199.9,
+      "precoAntigo": 249.9,
+      "descricao": "Camiseta branca de algodão com estampa frontal em aquarela de quadra e palmeiras. Peça leve pro calor.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Off-white",
+      "imagem": "assets/img/produtos/camiseta-clube-por-do-sol.webp",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 71,
+      "colecao": "Verão 88",
+      "estoque": 28
+    },
+    {
+      "id": 3,
+      "nome": "Camiseta Névoa",
+      "categoria": "Camisetas",
+      "preco": 189.9,
+      "descricao": "Padronagem monocromática borrada em cima de base branca. Toque macio e barra reta.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Branco",
+      "imagem": "assets/img/produtos/camiseta-nevoa.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 58,
+      "colecao": "",
+      "estoque": 4
+    },
+    {
+      "id": 4,
+      "nome": "Camiseta Gola Néon",
+      "categoria": "Camisetas",
+      "preco": 159.9,
+      "descricao": "Preta com lettering colorido aplicado em volta da gola. Simples de frente, barulhenta de perto.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/camiseta-gola-neon.jpeg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 112,
+      "colecao": "Asfalto",
+      "estoque": 17
+    },
+    {
+      "id": 5,
+      "nome": "Camiseta Traço Ouro",
+      "categoria": "Camisetas",
+      "preco": 219.9,
+      "descricao": "Base preta com desenho em contorno branco e detalhes dourados ocupando o peito inteiro.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/camiseta-traco-ouro.webp",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 44,
+      "colecao": "Asfalto",
+      "estoque": 30
+    },
+    {
+      "id": 6,
+      "nome": "Camiseta Ringer Contraste",
+      "categoria": "Camisetas",
+      "preco": 129.9,
+      "precoAntigo": 169.9,
+      "descricao": "O básico bem feito: corpo preto, gola e punho brancos. Entra em qualquer combinação.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Preto e branco",
+      "imagem": "assets/img/produtos/camiseta-ringer-contraste.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 138,
+      "colecao": "Asfalto",
+      "estoque": 6
+    },
+    {
+      "id": 7,
+      "nome": "Camiseta Padronagem Índigo",
+      "categoria": "Camisetas",
+      "preco": 209.9,
+      "descricao": "Fundo off-white com padronagem azul-marinho repetida de ponta a ponta. Gola careca reforçada.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Off-white",
+      "imagem": "assets/img/produtos/camiseta-padronagem-indigo.jpg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 36,
+      "colecao": "",
+      "estoque": 19
+    },
+    {
+      "id": 8,
+      "nome": "Camiseta Avenida Noturna",
+      "categoria": "Camisetas",
+      "preco": 169.9,
+      "descricao": "Estampa grande nas costas: arco iluminado, folhagem e céu de madrugada. Frente limpa.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/camiseta-avenida-noturna.webp",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 87,
+      "colecao": "Asfalto",
+      "estoque": 32
+    },
+    {
+      "id": 9,
+      "nome": "Jersey Mesh 00",
+      "categoria": "Camisetas",
+      "preco": 259.9,
+      "descricao": "Camisa de futebol americano em mesh azul e amarelo, numeração aplicada na frente e nas costas.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Azul",
+      "imagem": "assets/img/produtos/jersey-mesh-00.webp",
+      "destaque": true,
+      "lancamento": false,
+      "vendidos": 63,
+      "colecao": "Quadra",
+      "estoque": 8
+    },
+    {
+      "id": 10,
+      "nome": "Kit Polo Meio-Zíper",
+      "categoria": "Camisetas",
+      "preco": 289.9,
+      "precoAntigo": 349.9,
+      "descricao": "Duas polas de piquê com gola estampada e fechamento meio-zíper: uma branca e uma preta.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Branco e preto",
+      "imagem": "assets/img/produtos/kit-polo-meio-ziper.jpeg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 29,
+      "colecao": "",
+      "estoque": 21
+    },
+    {
+      "id": 11,
+      "nome": "Conjunto Tricô Damas",
+      "categoria": "Conjuntos",
+      "preco": 349.9,
+      "descricao": "Camisa e shorts de tricô furadinho branco com faixa quadriculada azul. Vendido como conjunto.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Branco e azul",
+      "imagem": "assets/img/produtos/conjunto-trico-damas.jpeg",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 41,
+      "colecao": "Verão 88",
+      "estoque": 34
+    },
+    {
+      "id": 12,
+      "nome": "Calça Alfaiataria Corte Seco",
+      "categoria": "Calças",
+      "preco": 249.9,
+      "descricao": "Alfaiataria preta com regulagem na cintura e barra acima do tornozelo. Tecido com leve elastano.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/calca-alfaiataria-corte-seco.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 76,
+      "colecao": "Asfalto",
+      "estoque": 10
+    },
+    {
+      "id": 13,
+      "nome": "Calça Jeans Wide Rasgada",
+      "categoria": "Calças",
+      "preco": 329.9,
+      "precoAntigo": 399.9,
+      "descricao": "Jeans claro de modelagem larga com rasgos aplicados na altura da coxa e joelho.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Azul claro",
+      "imagem": "assets/img/produtos/calca-jeans-wide-rasgada.webp",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 52,
+      "colecao": "",
+      "estoque": 23
+    },
+    {
+      "id": 14,
+      "nome": "Calça Jogger Padronagem",
+      "categoria": "Calças",
+      "preco": 299.9,
+      "descricao": "Jogger de nylon leve com padronagem preta e branca, punho elástico e bolso lateral.",
+      "tamanhos": [
+        "P",
+        "M",
+        "G",
+        "GG"
+      ],
+      "cor": "Preto e branco",
+      "imagem": "assets/img/produtos/calca-jogger-padronagem.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 33,
+      "colecao": "Asfalto",
+      "estoque": 36
+    },
+    {
+      "id": 15,
+      "nome": "Slide Monobloco",
+      "categoria": "Chinelos",
+      "preco": 139.9,
+      "descricao": "Slide inteiriço off-white com tira texturizada e solado macio. Veste de casa até a esquina.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Off-white",
+      "imagem": "assets/img/produtos/slide-monobloco.png",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 119,
+      "colecao": "Verão 88",
+      "estoque": 12
+    },
+    {
+      "id": 16,
+      "nome": "Tênis Mid Brasa",
+      "categoria": "Tênis",
+      "preco": 699.9,
+      "descricao": "Cano médio vermelho com painéis pretos e entressola branca. Couro encorpado.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Vermelho e preto",
+      "imagem": "assets/img/produtos/tenis-mid-brasa.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 81,
+      "colecao": "Quadra",
+      "estoque": 25
+    },
+    {
+      "id": 17,
+      "nome": "Tênis Low Céu",
+      "categoria": "Tênis",
+      "preco": 749.9,
+      "precoAntigo": 899.9,
+      "descricao": "Cano baixo azul-claro inteiro, com detalhe vermelho no cadarço. Silhueta limpa.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Azul claro",
+      "imagem": "assets/img/produtos/tenis-low-ceu.webp",
+      "destaque": true,
+      "lancamento": false,
+      "vendidos": 67,
+      "colecao": "Quadra",
+      "estoque": 38
+    },
+    {
+      "id": 18,
+      "nome": "Tênis Low Sola Leite",
+      "categoria": "Tênis",
+      "preco": 429.9,
+      "descricao": "Couro preto liso sobre sola branca alta. O par que combina com tudo que é escuro.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/tenis-low-sola-leite.png",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 143,
+      "colecao": "Asfalto",
+      "estoque": 14
+    },
+    {
+      "id": 19,
+      "nome": "Tênis Low Rubi",
+      "categoria": "Tênis",
+      "preco": 519.9,
+      "descricao": "Cano baixo vermelho e branco com recorte clássico. Cadarço off-white encorpado.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Vermelho e branco",
+      "imagem": "assets/img/produtos/tenis-low-rubi.jpeg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 58,
+      "colecao": "Quadra",
+      "estoque": 27
+    },
+    {
+      "id": 20,
+      "nome": "Tênis High Táxi",
+      "categoria": "Tênis",
+      "preco": 779.9,
+      "descricao": "Cano alto amarelo, preto e creme. Forro acolchoado e gravação no cano.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Amarelo e preto",
+      "imagem": "assets/img/produtos/tenis-high-taxi.jpeg",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 49,
+      "colecao": "Quadra",
+      "estoque": 3
+    },
+    {
+      "id": 21,
+      "nome": "Tênis Mid Girassol",
+      "categoria": "Tênis",
+      "preco": 659.9,
+      "descricao": "Cano médio amarelo com painéis brancos e entressola limpa. Bem confortável de primeira.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Amarelo e branco",
+      "imagem": "assets/img/produtos/tenis-mid-girassol.jpeg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 38,
+      "colecao": "Quadra",
+      "estoque": 16
+    },
+    {
+      "id": 22,
+      "nome": "Tênis Low Mostarda",
+      "categoria": "Tênis",
+      "preco": 699.9,
+      "descricao": "Cano baixo amarelo do cabedal à sola, com etiqueta lateral aplicada.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Amarelo",
+      "imagem": "assets/img/produtos/tenis-low-mostarda.jpeg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 27,
+      "colecao": "Quadra",
+      "estoque": 29
+    },
+    {
+      "id": 23,
+      "nome": "Tênis Low Universitário",
+      "categoria": "Tênis",
+      "preco": 589.9,
+      "precoAntigo": 679.9,
+      "descricao": "Azul-claro com detalhes brancos e sola na mesma cor. Couro liso fácil de limpar.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Azul e branco",
+      "imagem": "assets/img/produtos/tenis-low-universitario.jpeg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 95,
+      "colecao": "Quadra",
+      "estoque": 5
+    },
+    {
+      "id": 24,
+      "nome": "Tênis Plataforma Breu",
+      "categoria": "Tênis",
+      "preco": 639.9,
+      "descricao": "All black em nylon com sola plataforma grossa e triângulo metálico na lateral.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/tenis-plataforma-breu.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 44,
+      "colecao": "Asfalto",
+      "estoque": 18
+    },
+    {
+      "id": 25,
+      "nome": "Tênis Cadence Marinho",
+      "categoria": "Tênis",
+      "preco": 829.9,
+      "descricao": "Chunky com cabedal bege padronado, recortes azul-marinho e sola branca encorpada.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Bege e marinho",
+      "imagem": "assets/img/produtos/tenis-cadence-marinho.webp",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 31,
+      "colecao": "",
+      "estoque": 31
+    },
+    {
+      "id": 26,
+      "nome": "Tênis Cadence Areia",
+      "categoria": "Tênis",
+      "preco": 829.9,
+      "descricao": "Mesma silhueta chunky do Cadence, em versão mais clara com lateral azul profunda.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Areia e marinho",
+      "imagem": "assets/img/produtos/tenis-cadence-areia.jpeg",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 22,
+      "colecao": "",
+      "estoque": 7
+    },
+    {
+      "id": 27,
+      "nome": "Tênis High Fusão",
+      "categoria": "Tênis",
+      "preco": 899.9,
+      "descricao": "Cano alto branco com blocos vermelho e amarelo. Couro texturizado e sola preta.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Vermelho e amarelo",
+      "imagem": "assets/img/produtos/tenis-high-fusao.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 55,
+      "colecao": "Quadra",
+      "estoque": 20
+    },
+    {
+      "id": 28,
+      "nome": "Tênis Low Cromado",
+      "categoria": "Tênis",
+      "preco": 679.9,
+      "descricao": "Painéis em azul metálico espelhado com couro branco e sola translúcida.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Azul metálico",
+      "imagem": "assets/img/produtos/tenis-low-cromado.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 40,
+      "colecao": "Quadra",
+      "estoque": 33
+    },
+    {
+      "id": 29,
+      "nome": "Tênis Mid Ametista",
+      "categoria": "Tênis",
+      "preco": 949.9,
+      "precoAntigo": 1099.9,
+      "descricao": "Branco total com ilhós e detalhes em roxo. Visual de quadra coberta.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Branco e roxo",
+      "imagem": "assets/img/produtos/tenis-mid-ametista.webp",
+      "destaque": true,
+      "lancamento": false,
+      "vendidos": 61,
+      "colecao": "",
+      "estoque": 9
+    },
+    {
+      "id": 30,
+      "nome": "Tênis High Neblina",
+      "categoria": "Tênis",
+      "preco": 1299.9,
+      "descricao": "Cano alto azul e creme com acabamento desconstruído e lacre na lateral. Edição contada.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Azul e creme",
+      "imagem": "assets/img/produtos/tenis-high-neblina.webp",
+      "destaque": false,
+      "lancamento": true,
+      "vendidos": 73,
+      "colecao": "",
+      "estoque": 22
+    },
+    {
+      "id": 31,
+      "nome": "Tênis Low Royal",
+      "categoria": "Tênis",
+      "preco": 729.9,
+      "descricao": "Azul royal do cabedal à sola, com logo amarelo aplicado na lateral e no cadarço.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Azul royal",
+      "imagem": "assets/img/produtos/tenis-low-royal.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 36,
+      "colecao": "Quadra",
+      "estoque": 35
+    },
+    {
+      "id": 32,
+      "nome": "Tênis Low Camurça Corda",
+      "categoria": "Tênis",
+      "preco": 559.9,
+      "descricao": "Camurça preta com cadarço de corda grossa e entressola branca. Pisada firme.",
+      "tamanhos": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ],
+      "cor": "Preto",
+      "imagem": "assets/img/produtos/tenis-low-camurca-corda.webp",
+      "destaque": false,
+      "lancamento": false,
+      "vendidos": 104,
+      "colecao": "Asfalto",
+      "estoque": 11
+    }
+  ],
+  "colecoes": [
+    {
+      "id": "Asfalto",
+      "descricao": "Preto no preto. O uniforme de quem não quer ser notado — e acaba sendo."
+    },
+    {
+      "id": "Quadra",
+      "descricao": "Mesh, número nas costas e cor que grita. Veio do ginásio, ficou na calçada."
+    },
+    {
+      "id": "Verão 88",
+      "descricao": "Tricô furadinho, slide e tom claro. Calor com corte caprichado."
+    }
+  ],
+  "cupons": [
+    {
+      "id": "VERSO10",
+      "porcentagem": 10
+    },
+    {
+      "id": "DROP20",
+      "porcentagem": 20
+    }
+  ],
+  "usuarios": [
+    {
+      "id": 1,
+      "nome": "Administração VERSO",
+      "email": "admin@verso.com",
+      "senha": "admin123",
+      "tipo": "admin"
+    },
+    {
+      "id": 2,
+      "nome": "Cliente Demonstração",
+      "email": "cliente@verso.com",
+      "senha": "cliente123",
+      "tipo": "cliente"
+    }
+  ],
+  "pedidos": [],
+  "carrinhos": [],
+  "favoritos": []
+}
